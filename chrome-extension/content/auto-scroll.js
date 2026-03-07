@@ -9,17 +9,17 @@ class AutoScroll {
     this.isPaused = false;
     this.lastScrollTime = 0;
     this.animationId = null;
-    
+
     // Reading speed detection
     this.wordsRead = 0;
     this.readingStartTime = null;
     this.estimatedWPM = 200;
     this.targetWPM = 200;
-    
+
     // Viewport tracking
     this.viewportWords = [];
     this.visibleWordIndex = 0;
-    
+
     // Controls overlay
     this.controlsOverlay = null;
     this.progressBar = null;
@@ -28,29 +28,29 @@ class AutoScroll {
   enable() {
     if (this.isEnabled) return;
     this.isEnabled = true;
-    
+
     console.log('📜 Auto Scroll enabled');
-    
+
     this.readingStartTime = Date.now();
     this.analyzeContent();
     this.createControls();
     this.startScrolling();
     this.setupEventListeners();
-    
+
     document.body.classList.add('neuroread-scroll-active');
   }
 
   disable() {
     if (!this.isEnabled) return;
     this.isEnabled = false;
-    
+
     console.log('📜 Auto Scroll disabled');
-    
+
     this.stopScrolling();
     this.removeControls();
     this.removeEventListeners();
     this.saveReadingStats();
-    
+
     document.body.classList.remove('neuroread-scroll-active');
   }
 
@@ -58,7 +58,7 @@ class AutoScroll {
     // Find all text content and split into words
     const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, td');
     this.viewportWords = [];
-    
+
     textElements.forEach(el => {
       const text = el.textContent.trim();
       if (text) {
@@ -72,7 +72,7 @@ class AutoScroll {
         });
       }
     });
-    
+
     console.log(`Analyzed ${this.viewportWords.length} words`);
   }
 
@@ -99,12 +99,12 @@ class AutoScroll {
         <div class="scroll-progress-fill"></div>
       </div>
     `;
-    
+
     document.body.appendChild(this.controlsOverlay);
-    
+
     // Setup control buttons
     this.setupControlButtons();
-    
+
     // Get progress bar
     this.progressBar = this.controlsOverlay.querySelector('.scroll-progress-fill');
   }
@@ -113,15 +113,15 @@ class AutoScroll {
     // Pause/Play
     const pauseBtn = this.controlsOverlay.querySelector('.scroll-pause');
     pauseBtn.addEventListener('click', () => this.togglePause());
-    
+
     // Slower
     const slowerBtn = this.controlsOverlay.querySelector('.scroll-slower');
     slowerBtn.addEventListener('click', () => this.adjustSpeed(-20));
-    
+
     // Faster
     const fasterBtn = this.controlsOverlay.querySelector('.scroll-faster');
     fasterBtn.addEventListener('click', () => this.adjustSpeed(20));
-    
+
     // Stop
     const stopBtn = this.controlsOverlay.querySelector('.scroll-stop');
     stopBtn.addEventListener('click', () => this.disable());
@@ -148,19 +148,20 @@ class AutoScroll {
         this.adjustSpeed(-10);
       }
     };
-    
-    // Click to pause
+
+    // Click to pause — but not on interactive elements (links, buttons, inputs)
     this.clickHandler = (e) => {
-      if (!e.target.closest('#neuroread-scroll-controls')) {
+      const isInteractive = e.target.closest('a, button, input, select, textarea, [role="button"], [tabindex]');
+      if (!e.target.closest('#neuroread-scroll-controls') && !isInteractive) {
         this.togglePause();
       }
     };
-    
+
     // Scroll detection for speed adjustment
     this.scrollHandler = () => {
       this.detectManualScroll();
     };
-    
+
     document.addEventListener('keydown', this.keyHandler);
     document.addEventListener('click', this.clickHandler);
     window.addEventListener('scroll', this.scrollHandler);
@@ -198,36 +199,36 @@ class AutoScroll {
       this.animationId = requestAnimationFrame(() => this.scrollFrame());
       return;
     }
-    
+
     const now = performance.now();
     const deltaTime = (now - this.lastScrollTime) / 1000; // seconds
     this.lastScrollTime = now;
-    
+
     // Calculate scroll amount based on WPM
     // Average word length ~5 chars, average line ~60 chars = ~12 words per line
     // At 200 WPM, need to scroll ~17 lines per minute
     const pixelsPerWord = 20; // Approximate
     const scrollAmount = (this.targetWPM * pixelsPerWord / 60) * deltaTime;
-    
+
     window.scrollBy(0, scrollAmount);
-    
+
     // Update progress
     this.updateProgress();
-    
+
     // Check if reached end
     if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 100) {
       this.pause();
     }
-    
+
     this.animationId = requestAnimationFrame(() => this.scrollFrame());
   }
 
   togglePause() {
     this.isPaused = !this.isPaused;
-    
+
     const pauseIcon = this.controlsOverlay.querySelector('.pause-icon');
     const playIcon = this.controlsOverlay.querySelector('.play-icon');
-    
+
     if (this.isPaused) {
       pauseIcon.style.display = 'none';
       playIcon.style.display = 'inline';
@@ -251,10 +252,10 @@ class AutoScroll {
 
   adjustSpeed(delta) {
     this.targetWPM = Math.max(50, Math.min(800, this.targetWPM + delta));
-    
+
     const speedValue = this.controlsOverlay.querySelector('.speed-value');
     speedValue.textContent = this.targetWPM;
-    
+
     // Visual feedback
     speedValue.style.transform = 'scale(1.2)';
     setTimeout(() => {
@@ -269,23 +270,23 @@ class AutoScroll {
 
   updateProgress() {
     if (!this.progressBar) return;
-    
+
     const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
     this.progressBar.style.width = `${Math.min(100, Math.max(0, scrollPercent))}%`;
   }
 
   saveReadingStats() {
     if (!this.readingStartTime) return;
-    
+
     const readingTime = (Date.now() - this.readingStartTime) / 60000; // minutes
     const wordsRead = Math.floor(readingTime * this.targetWPM);
-    
+
     const stats = {
       wpm: this.targetWPM,
       time: Math.round(readingTime),
       words: wordsRead
     };
-    
+
     // Send to background script
     chrome.runtime.sendMessage({
       action: 'updateStats',
@@ -297,7 +298,7 @@ class AutoScroll {
   highlightCurrentWord() {
     // Find word at current scroll position
     const viewportCenter = window.scrollY + window.innerHeight / 2;
-    
+
     // Simple word highlighting based on position
     // In full implementation, track exact word position
   }

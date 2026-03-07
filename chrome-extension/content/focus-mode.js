@@ -8,20 +8,21 @@ class FocusMode {
     this.focusOverlay = null;
     this.articleContent = null;
     this.scrollPosition = 0;
+    this.escHandler = null;
   }
 
   enable() {
     if (this.isEnabled) return;
     this.isEnabled = true;
-    
+
     console.log('🎯 Focus Mode enabled');
-    
+
     // Save scroll position
     this.scrollPosition = window.scrollY;
-    
+
     // Find main content
     this.articleContent = this.findMainContent();
-    
+
     if (this.articleContent) {
       this.createFocusOverlay();
       this.hideDistractions();
@@ -29,34 +30,47 @@ class FocusMode {
       console.log('No main content found, using fallback');
       this.enableSimpleFocus();
     }
-    
+
     document.body.classList.add('neuroread-focus-active');
+
+    // Attach Escape key handler to DOCUMENT (not overlay) so it always fires
+    this.escHandler = (e) => {
+      if (e.key === 'Escape') {
+        this.disable();
+      }
+    };
+    document.addEventListener('keydown', this.escHandler);
   }
 
   disable() {
     if (!this.isEnabled) return;
     this.isEnabled = false;
-    
+
     console.log('🎯 Focus Mode disabled');
-    
+
+    // Remove escape handler
+    if (this.escHandler) {
+      document.removeEventListener('keydown', this.escHandler);
+      this.escHandler = null;
+    }
+
     // Remove focus overlay
     if (this.focusOverlay) {
       this.focusOverlay.remove();
       this.focusOverlay = null;
     }
-    
+
     // Restore hidden elements
     this.restoreDistractions();
-    
+
     // Remove body class
     document.body.classList.remove('neuroread-focus-active');
-    
+
     // Restore scroll position
     window.scrollTo(0, this.scrollPosition);
   }
 
   findMainContent() {
-    // Try to find the main article/content
     const selectors = [
       'article',
       'main',
@@ -98,27 +112,20 @@ class FocusMode {
   }
 
   createFocusOverlay() {
-    // Create the focus overlay container
     this.focusOverlay = document.createElement('div');
     this.focusOverlay.id = 'neuroread-focus-overlay';
     this.focusOverlay.innerHTML = `
       <div class="neuroread-focus-header">
-        <button class="neuroread-focus-close" title="Close Focus Mode (Esc)">
-          <span>✕</span>
-        </button>
+        <div class="neuroread-focus-brand">
+          <span class="neuroread-focus-logo">🧠</span>
+          <span class="neuroread-focus-title">Focus Mode</span>
+        </div>
         <div class="neuroread-focus-controls">
-          <button class="neuroread-focus-btn" data-action="decrease-font" title="Decrease Font Size">
-            <span>A-</span>
-          </button>
-          <button class="neuroread-focus-btn" data-action="increase-font" title="Increase Font Size">
-            <span>A+</span>
-          </button>
-          <button class="neuroread-focus-btn" data-action="toggle-theme" title="Toggle Theme">
-            <span>🎨</span>
-          </button>
-          <button class="neuroread-focus-btn" data-action="tts" title="Read Aloud">
-            <span>🔊</span>
-          </button>
+          <button class="neuroread-focus-btn" data-action="decrease-font" title="Decrease Font Size">A−</button>
+          <button class="neuroread-focus-btn" data-action="increase-font" title="Increase Font Size">A+</button>
+          <button class="neuroread-focus-btn" data-action="toggle-theme" title="Toggle Theme">🎨</button>
+          <button class="neuroread-focus-btn" data-action="tts" title="Read Aloud">🔊</button>
+          <button class="neuroread-focus-close" title="Close Focus Mode (Esc)">✕</button>
         </div>
       </div>
       <div class="neuroread-focus-content">
@@ -133,7 +140,7 @@ class FocusMode {
 
     // Setup controls
     this.setupFocusControls();
-    
+
     // Setup progress tracking
     this.setupProgressTracking();
   }
@@ -147,7 +154,7 @@ class FocusMode {
     // Font size controls
     let fontSize = 18;
     const content = this.focusOverlay.querySelector('.neuroread-focus-content');
-    
+
     this.focusOverlay.querySelector('[data-action="decrease-font"]').addEventListener('click', () => {
       fontSize = Math.max(14, fontSize - 2);
       content.style.fontSize = `${fontSize}px`;
@@ -161,7 +168,7 @@ class FocusMode {
     // Theme toggle
     const themes = ['default', 'sepia', 'dark', 'high-contrast'];
     let currentThemeIndex = 0;
-    
+
     this.focusOverlay.querySelector('[data-action="toggle-theme"]').addEventListener('click', () => {
       currentThemeIndex = (currentThemeIndex + 1) % themes.length;
       this.focusOverlay.setAttribute('data-theme', themes[currentThemeIndex]);
@@ -173,13 +180,6 @@ class FocusMode {
         window.neuroread.features.tts.speak(this.articleContent.textContent);
       }
     });
-
-    // Keyboard shortcuts
-    this.focusOverlay.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        this.disable();
-      }
-    });
   }
 
   setupProgressTracking() {
@@ -189,7 +189,7 @@ class FocusMode {
     const updateProgress = () => {
       const scrollTop = this.focusOverlay.scrollTop;
       const scrollHeight = content.scrollHeight - this.focusOverlay.clientHeight;
-      const progress = (scrollTop / scrollHeight) * 100;
+      const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
       progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
     };
 
@@ -198,7 +198,6 @@ class FocusMode {
   }
 
   hideDistractions() {
-    // Elements to hide
     const hideSelectors = [
       'header:not(.neuroread-focus-header)',
       'nav',
@@ -251,17 +250,17 @@ class FocusMode {
   }
 
   enableSimpleFocus() {
-    // Fallback: Just dim everything except main content area
     const style = document.createElement('style');
     style.id = 'neuroread-simple-focus';
     style.textContent = `
       body > *:not(#neuroread-focus-overlay):not([id^="neuroread"]) {
-        opacity: 0.1 !important;
+        opacity: 0.08 !important;
         pointer-events: none !important;
+        transition: opacity 0.3s ease !important;
       }
     `;
     document.head.appendChild(style);
-    
+
     this.focusOverlay = { remove: () => style.remove() };
   }
 }

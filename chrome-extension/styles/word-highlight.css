@@ -1,21 +1,20 @@
-/* Word Highlight Styles */
+/* Word Highlight Styles — all overlay elements use position:fixed for correct viewport alignment */
 
 #neuroread-word-highlight {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   pointer-events: none;
   z-index: 999990;
 }
 
+/* The moving bar is fixed to the viewport — no scrollY offset needed */
 .highlight-line {
-  position: absolute;
-  background: rgba(99, 102, 241, 0.15);
-  border-left: 3px solid rgba(99, 102, 241, 0.6);
-  border-radius: 4px;
-  transition: all 0.1s ease-out;
+  position: fixed;
+  background: rgba(99, 102, 241, 0.12);
+  border-left: 4px solid rgba(99, 102, 241, 0.7);
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2), inset 0 0 20px rgba(99, 102, 241, 0.04);
+  transition: top 0.08s ease-out, height 0.08s ease-out, left 0.08s ease-out, width 0.08s ease-out;
   pointer-events: none;
 }
 
@@ -25,71 +24,86 @@
   right: 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #1e293b;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.9);
   padding: 8px 10px;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.03);
   pointer-events: auto;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .highlight-btn {
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: rgba(255,255,255,0.1);
-  color: white;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
 }
 
 .highlight-btn:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.5);
+  transform: scale(1.05);
 }
 
 .highlight-btn.active {
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
 }
 
 .highlight-divider {
   width: 1px;
-  height: 24px;
-  background: rgba(255,255,255,0.15);
+  height: 22px;
+  background: rgba(255, 255, 255, 0.12);
   margin: 0 2px;
 }
 
 .highlight-rate {
-  color: #e2e8f0;
-  font-size: 13px;
+  color: #c4b5fd;
+  font-size: 12px;
+  font-weight: 600;
   padding: 0 4px;
-  min-width: 70px;
+  min-width: 68px;
   text-align: center;
+  letter-spacing: 0.03em;
 }
 
-/* Static word highlight for TTS */
+/* Active word highlight span for auto-reading mode */
 .neuroread-word-highlight-static {
   background: rgba(99, 102, 241, 0.3);
   border-radius: 3px;
   padding: 0 2px;
-  animation: wordHighlightPulse 0.5s ease;
+  animation: wordHighlightPulse 0.4s ease;
 }
 
 .neuroread-word-highlight-active {
-  background: rgba(34, 211, 238, 0.28);
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.3), rgba(139, 92, 246, 0.2));
   color: inherit;
   border-radius: 4px;
-  padding: 1px 2px;
-  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.18);
+  padding: 1px 3px;
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.25);
+  font-weight: 600;
 }
 
 @keyframes wordHighlightPulse {
-  0% { background: rgba(99, 102, 241, 0.5); }
-  100% { background: rgba(99, 102, 241, 0.3); }
+  0% {
+    background: rgba(99, 102, 241, 0.6);
+  }
+
+  100% {
+    background: rgba(99, 102, 241, 0.3);
+  }
 }
 
 /* TTS Speaking indicator */
@@ -97,17 +111,17 @@ body.neuroread-tts-speaking {
   cursor: progress;
 }
 
-/* Highlight mode variations */
+/* Highlight mode variations — affect the bar height */
 body.neuroread-highlight-mode-line .highlight-line {
-  height: 1.6em !important;
+  height: 1.7em !important;
 }
 
 body.neuroread-highlight-mode-word .highlight-line {
   height: 1.4em !important;
-  border-radius: 2px !important;
+  border-radius: 3px !important;
 }
 
 body.neuroread-highlight-mode-paragraph .highlight-line {
-  min-height: 3em !important;
-  border-radius: 8px !important;
+  min-height: 3.5em !important;
+  border-radius: 10px !important;
 }

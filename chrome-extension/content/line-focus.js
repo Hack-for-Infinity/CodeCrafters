@@ -9,8 +9,8 @@ class LineFocus {
     this.controls = null;
     this.autoTimer = null;
     this.currentY = window.innerHeight * 0.3;
-    this.stepPx = 32;
-    this.autoIntervalMs = 4500;
+    this.stepPx = 30;
+    this.autoIntervalMs = 4000;
     this.isAuto = false;
 
     this.mouseHandler = (e) => {
@@ -30,8 +30,11 @@ class LineFocus {
         this.nudge(-this.stepPx);
       }
       if (e.key === ' ') {
-        e.preventDefault();
-        this.toggleAuto();
+        // Only intercept space if not in an input
+        if (document.activeElement === document.body || document.activeElement === null) {
+          e.preventDefault();
+          this.toggleAuto();
+        }
       }
       if (e.key === 'Escape') {
         this.disable();
@@ -132,60 +135,100 @@ class LineFocus {
   }
 
   nudge(delta) {
-    this.currentY = Math.max(10, Math.min(window.innerHeight - 10, this.currentY + delta));
-    if (this.currentY > window.innerHeight - 120) {
-      window.scrollBy({ top: 120, behavior: 'smooth' });
+    this.currentY = Math.max(20, Math.min(window.innerHeight - 20, this.currentY + delta));
+
+    // Auto-scroll page when bar reaches near edges
+    if (this.currentY > window.innerHeight - 100) {
+      window.scrollBy({ top: 100, behavior: 'smooth' });
+      this.currentY = window.innerHeight - 120;
     }
-    if (this.currentY < 120 && window.scrollY > 0) {
-      window.scrollBy({ top: -120, behavior: 'smooth' });
+    if (this.currentY < 100 && window.scrollY > 0) {
+      window.scrollBy({ top: -100, behavior: 'smooth' });
+      this.currentY = 120;
     }
+
     this.updateBarPosition();
   }
 
   updateBarPosition() {
     if (!this.bar) return;
 
-    const rect = this.getLineRect(this.currentY);
+    // Detect line at current mouse Y using caret range
+    const lineInfo = this.detectLineAtY(this.currentY);
 
-    if (rect) {
-      const width = rect.width && rect.width > 20 ? rect.width : document.documentElement.clientWidth - 24;
-      const left = rect.width && rect.width > 20 ? rect.left : 12;
-      const height = Math.max(rect.height || 0, 28);
-
-      this.bar.style.top = `${rect.top + window.scrollY}px`;
-      this.bar.style.left = `${left}px`;
-      this.bar.style.width = `${width}px`;
-      this.bar.style.height = `${height}px`;
+    if (lineInfo) {
+      // Bar is position: fixed, so we use viewport coordinates directly
+      this.bar.style.top = `${lineInfo.top}px`;
+      this.bar.style.left = `${lineInfo.left}px`;
+      this.bar.style.width = `${lineInfo.width}px`;
+      this.bar.style.height = `${lineInfo.height}px`;
     } else {
-      // Fallback full-width bar at currentY
-      this.bar.style.top = `${window.scrollY + this.currentY - 14}px`;
+      // Fallback: full-width bar centered at currentY
+      this.bar.style.top = `${this.currentY - 16}px`;
       this.bar.style.left = '8px';
       this.bar.style.width = `calc(100% - 16px)`;
       this.bar.style.height = '32px';
     }
   }
 
-  getLineRect(y) {
+  detectLineAtY(y) {
+    // Try to find the text line bounding rect at this Y position
     const range = this.getRangeFromPoint(window.innerWidth / 2, y);
+
     if (range) {
       const rect = range.getBoundingClientRect();
-      if (rect && rect.height > 0) {
-        // If width is 0, try to derive from parent element
-        if (!rect.width || rect.width < 1) {
+
+      if (rect && rect.height > 2) {
+        // If range width is zero, use the parent element width
+        if (!rect.width || rect.width < 4) {
           const container = range.startContainer?.parentElement;
           if (container) {
             const cRect = container.getBoundingClientRect();
-            return {
-              top: rect.top,
-              left: cRect.left + 4,
-              width: cRect.width - 8,
-              height: rect.height
-            };
+            if (cRect.width > 10) {
+              return {
+                top: rect.top - 4,
+                left: cRect.left,
+                width: cRect.width,
+                height: Math.max(rect.height + 8, 28)
+              };
+            }
           }
         }
-        return rect;
+
+        // Expand the bar to the full text container width
+        const container = range.startContainer?.parentElement;
+        const cRect = container?.getBoundingClientRect();
+        const left = (cRect && cRect.width > 40) ? cRect.left : rect.left;
+        const width = (cRect && cRect.width > 40) ? cRect.width : Math.max(rect.width, document.documentElement.clientWidth - 24);
+
+        return {
+          top: rect.top - 4,
+          left: left,
+          width: width,
+          height: Math.max(rect.height + 8, 28)
+        };
       }
     }
+
+    // Second attempt: try to find a text element at this y
+    const elements = document.elementsFromPoint(window.innerWidth / 2, y);
+    for (const el of elements) {
+      if (el.id && el.id.startsWith('neuroread')) continue;
+      const tag = el.tagName?.toLowerCase();
+      if (['p', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'a', 'td', 'div'].includes(tag)) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 40 && rect.height > 0) {
+          const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 24;
+          return {
+            top: y - (lineHeight / 2) - 4,
+            left: rect.left,
+            width: rect.width,
+            height: lineHeight + 8
+          };
+        }
+      }
+    }
+
     return null;
   }
 
@@ -193,17 +236,21 @@ class LineFocus {
     if (document.caretRangeFromPoint) {
       try {
         return document.caretRangeFromPoint(x, y);
-      } catch (error) {
-        // ignore and fall through
+      } catch (e) {
+        // ignore
       }
     }
     if (document.caretPositionFromPoint) {
-      const pos = document.caretPositionFromPoint(x, y);
-      if (pos) {
-        const range = document.createRange();
-        range.setStart(pos.offsetNode, pos.offset);
-        range.collapse(true);
-        return range;
+      try {
+        const pos = document.caretPositionFromPoint(x, y);
+        if (pos) {
+          const range = document.createRange();
+          range.setStart(pos.offsetNode, pos.offset);
+          range.collapse(true);
+          return range;
+        }
+      } catch (e) {
+        // ignore
       }
     }
     return null;

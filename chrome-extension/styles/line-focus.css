@@ -1,4 +1,4 @@
-/* Line Focus overlay */
+/* Line Focus overlay — all elements are position:fixed for viewport accuracy */
 #neuroread-line-focus {
   position: fixed;
   inset: 0;
@@ -7,36 +7,44 @@
   font-family: system-ui, -apple-system, sans-serif;
 }
 
+/* The focus bar is fixed so it stays perfectly aligned with visible text */
 #neuroread-line-focus .line-focus-bar {
-  position: absolute;
-  left: 12px;
-  right: 12px;
+  position: fixed;
+  left: 8px;
+  right: 8px;
   height: 32px;
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.45);
-  border-radius: 10px;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 0 0 2px rgba(99, 102, 241, 0.12);
-  backdrop-filter: none;
-  transition: top 0.15s ease, height 0.15s ease, left 0.15s ease, width 0.15s ease;
+  background: rgba(99, 102, 241, 0.1);
+  border: 2px solid rgba(99, 102, 241, 0.5);
+  border-left: 4px solid rgba(139, 92, 246, 0.9);
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 0 0 1px rgba(99, 102, 241, 0.08),
+    0 4px 20px rgba(99, 102, 241, 0.15);
+  transition: top 0.12s ease, height 0.12s ease, left 0.12s ease, width 0.12s ease;
+  pointer-events: none;
 }
 
+/* Top-right floating controls panel */
 #neuroread-line-focus .line-focus-controls {
   position: fixed;
   top: 14px;
   right: 14px;
   display: flex;
   gap: 6px;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
   padding: 6px;
   pointer-events: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 #neuroread-line-focus .lf-btn {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
   border-radius: 8px;
   width: 32px;
@@ -49,13 +57,24 @@
 }
 
 #neuroread-line-focus .lf-btn:hover {
-  background: rgba(99, 102, 241, 0.25);
-  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.3);
+  border-color: rgba(99, 102, 241, 0.6);
+  transform: scale(1.05);
+}
+
+#neuroread-line-focus .lf-toggle.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-color: transparent;
 }
 
 #neuroread-line-focus .lf-btn:focus-visible {
   outline: 2px solid #6366f1;
   outline-offset: 2px;
+}
+
+#neuroread-line-focus .lf-close:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 body.neuroread-linefocus-active {

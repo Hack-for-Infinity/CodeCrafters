@@ -5,8 +5,6 @@ class WordHighlight {
   constructor() {
     this.isEnabled = false;
     this.highlightElement = null;
-    this.currentLine = null;
-    this.isFollowingMouse = false;
     this.isAutoAdvance = false;
     this.words = [];
     this.currentWordIndex = 0;
@@ -14,51 +12,44 @@ class WordHighlight {
     this.autoTimer = null;
     this.wpm = 200;
     this.lastSpan = null;
-    
+    this.lastMouseY = window.innerHeight * 0.4;
+
     // Settings
     this.highlightMode = 'line'; // 'line', 'word', 'paragraph'
-    this.highlightColor = 'rgba(99, 102, 241, 0.2)';
-    this.highlightHeight = 1.5; // em
-    
-    // Animation
-    this.animationId = null;
-    this.lastMouseY = 0;
+    this.bar = null;
   }
 
   enable() {
     if (this.isEnabled) return;
     this.isEnabled = true;
-    
+
     console.log('✨ Word Highlight enabled');
-    
+
     this.buildWordIndex();
     this.createHighlight();
     this.setupEventListeners();
-    this.startFollowing();
-    this.highlightCurrentWord();
+    this.updateHighlightPosition(this.lastMouseY);
     this.updateRateDisplay();
-    
+
     document.body.classList.add('neuroread-highlight-active');
   }
 
   disable() {
     if (!this.isEnabled) return;
     this.isEnabled = false;
-    
+
     console.log('✨ Word Highlight disabled');
-    
+
     this.stopAutoAdvance();
     this.clearWordHighlight();
-    this.stopFollowing();
     this.removeEventListeners();
     this.removeHighlight();
-    
+
     document.body.classList.remove('neuroread-highlight-active');
     document.body.classList.remove('neuroread-highlight-mode-line', 'neuroread-highlight-mode-word', 'neuroread-highlight-mode-paragraph');
   }
 
   createHighlight() {
-    // Create the highlight element
     this.highlightElement = document.createElement('div');
     this.highlightElement.id = 'neuroread-word-highlight';
     this.highlightElement.innerHTML = `
@@ -75,9 +66,10 @@ class WordHighlight {
         <button class="highlight-btn" data-action="reset" title="Restart">⟳</button>
       </div>
     `;
-    
+
     document.body.appendChild(this.highlightElement);
-    
+    this.bar = this.highlightElement.querySelector('.highlight-line');
+
     // Setup mode buttons
     this.highlightElement.querySelectorAll('.highlight-btn').forEach(btn => {
       if (btn.dataset.mode) {
@@ -87,8 +79,7 @@ class WordHighlight {
         btn.addEventListener('click', () => this.handleAction(btn.dataset.action));
       }
     });
-    
-    // Set initial mode
+
     this.setMode(this.highlightMode);
   }
 
@@ -96,12 +87,13 @@ class WordHighlight {
     if (this.highlightElement) {
       this.highlightElement.remove();
       this.highlightElement = null;
+      this.bar = null;
     }
   }
 
   setMode(mode) {
     this.highlightMode = mode;
-    
+
     // Update button states
     this.highlightElement.querySelectorAll('.highlight-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.mode === mode);
@@ -109,61 +101,56 @@ class WordHighlight {
 
     document.body.classList.remove('neuroread-highlight-mode-line', 'neuroread-highlight-mode-word', 'neuroread-highlight-mode-paragraph');
     document.body.classList.add(`neuroread-highlight-mode-${mode}`);
-    
-    // Update highlight style
-    const line = this.highlightElement.querySelector('.highlight-line');
-    
-    switch (mode) {
-      case 'line':
-        line.style.height = '1.6em';
-        line.style.borderRadius = '4px';
-        break;
-      case 'word':
-        line.style.height = '1.4em';
-        line.style.borderRadius = '2px';
-        break;
-      case 'paragraph':
-        line.style.height = 'auto';
-        line.style.minHeight = '3em';
-        line.style.borderRadius = '8px';
-        break;
+
+    // Update highlight height based on mode
+    if (this.bar) {
+      switch (mode) {
+        case 'line':
+          this.bar.style.height = '1.7em';
+          this.bar.style.borderRadius = '6px';
+          break;
+        case 'word':
+          this.bar.style.height = '1.4em';
+          this.bar.style.borderRadius = '3px';
+          break;
+        case 'paragraph':
+          this.bar.style.minHeight = '3em';
+          this.bar.style.borderRadius = '10px';
+          break;
+      }
     }
   }
 
   setupEventListeners() {
-    // Mouse tracking
     this.mouseHandler = (e) => {
       if (this.isAutoAdvance) return;
       this.lastMouseY = e.clientY;
       this.updateHighlightPosition(e.clientY);
     };
-    
-    // Scroll tracking
+
     this.scrollHandler = () => {
-      // Keep highlight in view during scroll
-      if (this.lastMouseY > 0) {
+      if (!this.isAutoAdvance && this.lastMouseY > 0) {
         this.updateHighlightPosition(this.lastMouseY);
       }
     };
-    
-    // Keyboard navigation
+
     this.keyHandler = (e) => {
+      if (!this.isEnabled) return;
       if (e.key === 'ArrowDown') {
-        this.moveHighlight(30);
+        this.lastMouseY = Math.min(window.innerHeight - 20, this.lastMouseY + 30);
+        this.updateHighlightPosition(this.lastMouseY);
       } else if (e.key === 'ArrowUp') {
-        this.moveHighlight(-30);
-      } else if (e.code === 'Space') {
-        e.preventDefault();
-        this.toggleAutoAdvance();
+        this.lastMouseY = Math.max(20, this.lastMouseY - 30);
+        this.updateHighlightPosition(this.lastMouseY);
       } else if (e.key === 'ArrowRight') {
         this.advanceWord();
       } else if (e.key === 'ArrowLeft') {
         this.rewindWord();
       }
     };
-    
-    document.addEventListener('mousemove', this.mouseHandler);
-    window.addEventListener('scroll', this.scrollHandler);
+
+    document.addEventListener('mousemove', this.mouseHandler, { passive: true });
+    window.addEventListener('scroll', this.scrollHandler, { passive: true });
     document.addEventListener('keydown', this.keyHandler);
   }
 
@@ -173,142 +160,56 @@ class WordHighlight {
     document.removeEventListener('keydown', this.keyHandler);
   }
 
-  startFollowing() {
-    this.isFollowingMouse = true;
-  }
-
-  stopFollowing() {
-    this.isFollowingMouse = false;
-    if (this.animationId) {
-      cancelAnimationFrame(this.animationId);
-      this.animationId = null;
-    }
-  }
-
   updateHighlightPosition(y) {
-    if (!this.highlightElement) return;
-    
-    const line = this.highlightElement.querySelector('.highlight-line');
-    
-    // Get the element at this Y position
-    const element = document.elementFromPoint(window.innerWidth / 2, y);
-    
-    if (element) {
-      // Find the text line at this position
-      const rect = this.getLineRect(element, y);
-      
-      if (rect) {
-        line.style.top = `${rect.top + window.scrollY}px`;
-        line.style.left = `${rect.left}px`;
-        line.style.width = `${rect.width}px`;
-        line.style.height = `${rect.height}px`;
-      }
-    }
-  }
+    if (!this.bar) return;
 
-  getLineRect(element, y) {
-    // Get the bounding rectangle of the text line
+    // Use caret range to find actual text line at this Y
     const range = this.getRangeFromPoint(window.innerWidth / 2, y);
-    
+
     if (range) {
       const rect = range.getBoundingClientRect();
-      return {
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height
-      };
+
+      if (rect && rect.height > 2) {
+        // Get parent element for full-width coverage
+        const container = range.startContainer?.parentElement;
+        const cRect = container?.getBoundingClientRect();
+
+        const left = (cRect && cRect.width > 40) ? cRect.left : rect.left;
+        const width = (cRect && cRect.width > 40) ? cRect.width : Math.max(rect.width, 200);
+        const lineHeight = parseFloat(getComputedStyle(container || document.body).lineHeight) || 24;
+
+        // position: fixed — viewport coordinates, NO scrollY offset
+        this.bar.style.top = `${rect.top - 4}px`;
+        this.bar.style.left = `${left}px`;
+        this.bar.style.width = `${width}px`;
+        this.bar.style.height = `${Math.max(rect.height + 8, lineHeight + 4)}px`;
+        return;
+      }
     }
-    
-    // Fallback to element rect
-    const elemRect = element.getBoundingClientRect();
-    return {
-      top: elemRect.top,
-      left: elemRect.left,
-      width: elemRect.width,
-      height: parseFloat(getComputedStyle(element).lineHeight) || 24
-    };
-  }
 
-  moveHighlight(deltaY) {
-    this.lastMouseY += deltaY;
-    this.lastMouseY = Math.max(0, Math.min(window.innerHeight, this.lastMouseY));
-    this.updateHighlightPosition(this.lastMouseY);
-  }
-
-  // Auto-advance mode for hands-free reading
-  startAutoAdvance(wpm = 200) {
-    this.stopAutoAdvance();
-    this.isAutoAdvance = true;
-    this.wpm = wpm;
-    this.updateRateDisplay();
-    const msPerWord = 60000 / Math.max(80, this.wpm);
-    this.highlightCurrentWord();
-    this.autoTimer = setInterval(() => {
-      this.advanceWord();
-    }, msPerWord);
-  }
-
-  stopAutoAdvance() {
-    this.isAutoAdvance = false;
-    if (this.autoTimer) {
-      clearInterval(this.autoTimer);
-      this.autoTimer = null;
-    }
-    this.updatePlayButton(false);
-  }
-
-  // Highlight specific word
-  highlightWord(word) {
-    // Find and highlight a specific word in the document
-    const walker = document.createTreeWalker(
-      document.body,
-      NodeFilter.SHOW_TEXT,
-      null
-    );
-    
-    let node;
-    while (node = walker.nextNode()) {
-      const text = node.textContent;
-      const regex = new RegExp(`\\b${word}\\b`, 'i');
-      
-      if (regex.test(text)) {
-        // Create highlight
-        const span = document.createElement('span');
-        span.className = 'neuroread-word-highlight-static';
-        
-        const parts = text.split(regex);
-        const match = text.match(regex);
-        
-        if (parts.length > 1 && match) {
-          const before = document.createTextNode(parts[0]);
-          span.textContent = match[0];
-          const after = document.createTextNode(parts.slice(1).join(match[0]));
-          
-          const wrapper = document.createElement('span');
-          wrapper.appendChild(before);
-          wrapper.appendChild(span);
-          wrapper.appendChild(after);
-          
-          node.parentNode.replaceChild(wrapper, node);
-          
-          // Scroll to word
-          span.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
-          // Remove highlight after delay
-          setTimeout(() => {
-            if (wrapper.parentNode) {
-              const textNode = document.createTextNode(wrapper.textContent);
-              wrapper.parentNode.replaceChild(textNode, wrapper);
-            }
-          }, 2000);
-          
-          return true;
+    // Fallback: find a text element at this y
+    const elements = document.elementsFromPoint(window.innerWidth / 2, y);
+    for (const el of elements) {
+      if (el.id && el.id.startsWith('neuroread')) continue;
+      const tag = el.tagName?.toLowerCase();
+      if (['p', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'a', 'td', 'div'].includes(tag)) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 40) {
+          const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 24;
+          this.bar.style.top = `${y - lineHeight / 2 - 4}px`;
+          this.bar.style.left = `${rect.left}px`;
+          this.bar.style.width = `${rect.width}px`;
+          this.bar.style.height = `${lineHeight + 8}px`;
+          return;
         }
       }
     }
-    
-    return false;
+
+    // Last resort: bar at mouse position
+    this.bar.style.top = `${y - 16}px`;
+    this.bar.style.left = '8px';
+    this.bar.style.width = `calc(100% - 16px)`;
+    this.bar.style.height = '32px';
   }
 
   buildWordIndex() {
@@ -363,7 +264,11 @@ class WordHighlight {
 
     const span = document.createElement('span');
     span.className = 'neuroread-word-highlight-active';
-    range.surroundContents(span);
+    try {
+      range.surroundContents(span);
+    } catch (e) {
+      return;
+    }
     this.lastSpan = span;
 
     span.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -387,6 +292,28 @@ class WordHighlight {
     if (!this.words.length) return;
     this.currentWordIndex = (this.currentWordIndex - 1 + this.words.length) % this.words.length;
     this.highlightCurrentWord();
+  }
+
+  // Auto-advance mode
+  startAutoAdvance(wpm = 200) {
+    this.stopAutoAdvance();
+    this.isAutoAdvance = true;
+    this.wpm = wpm;
+    this.updateRateDisplay();
+    const msPerWord = 60000 / Math.max(80, this.wpm);
+    this.highlightCurrentWord();
+    this.autoTimer = setInterval(() => {
+      this.advanceWord();
+    }, msPerWord);
+  }
+
+  stopAutoAdvance() {
+    this.isAutoAdvance = false;
+    if (this.autoTimer) {
+      clearInterval(this.autoTimer);
+      this.autoTimer = null;
+    }
+    this.updatePlayButton(false);
   }
 
   toggleAutoAdvance() {
@@ -446,21 +373,19 @@ class WordHighlight {
     if (document.caretRangeFromPoint) {
       try {
         return document.caretRangeFromPoint(x, y);
-      } catch (error) {
-        console.warn('caretRangeFromPoint failed, falling back', error);
-      }
+      } catch (e) { /* ignore */ }
     }
-
     if (document.caretPositionFromPoint) {
-      const position = document.caretPositionFromPoint(x, y);
-      if (position) {
-        const range = document.createRange();
-        range.setStart(position.offsetNode, position.offset);
-        range.collapse(true);
-        return range;
-      }
+      try {
+        const position = document.caretPositionFromPoint(x, y);
+        if (position) {
+          const range = document.createRange();
+          range.setStart(position.offsetNode, position.offset);
+          range.collapse(true);
+          return range;
+        }
+      } catch (e) { /* ignore */ }
     }
-
     return null;
   }
 }

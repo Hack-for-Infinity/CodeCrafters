@@ -2,587 +2,1113 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroRead Demo - Experience Accessible Reading</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroRead — Interactive Demo</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-glow: rgba(99, 102, 241, 0.4);
+      --secondary: #8b5cf6;
+      --accent: #22d3ee;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --bg: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.6);
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border: rgba(148, 163, 184, 0.15);
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.8;
-        }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-        /* Hero Banner */
-        .hero {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
-            color: white;
-            padding: 60px 24px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
+    /* ===== HEADER ===== */
+    .demo-header {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: heroShine 8s ease-in-out infinite;
-        }
+    .demo-header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-        @keyframes heroShine {
+    .demo-header-logo .logo-emoji {
+      font-size: 28px;
+      filter: drop-shadow(0 0 12px var(--primary-glow));
+    }
 
-            0%,
-            100% {
-                transform: translate(0, 0);
-            }
+    .demo-header-logo h1 {
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-            50% {
-                transform: translate(30px, -30px);
-            }
-        }
+    .demo-header-logo .demo-badge {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+    }
 
-        .hero h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-            position: relative;
-        }
+    .header-shortcuts {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
 
-        .hero p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto 24px;
-            position: relative;
-        }
+    .shortcut-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
 
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            position: relative;
-        }
+    kbd {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-family: inherit;
+      color: var(--text);
+    }
 
-        /* Feature Bar */
-        .feature-bar {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            padding: 24px;
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
-        }
+    /* ===== MAIN LAYOUT ===== */
+    .demo-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 68px);
+    }
 
-        .feature-tag {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            background: #f1f5f9;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #475569;
-            transition: all 0.2s;
-        }
+    /* ===== CONTROL PANEL ===== */
+    .control-panel {
+      background: rgba(15, 23, 42, 0.8);
+      border-right: 1px solid var(--border);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      backdrop-filter: blur(8px);
+    }
 
-        .feature-tag:hover {
-            background: #e0e7ff;
-            color: #4338ca;
-            transform: translateY(-1px);
-        }
+    .panel-section h3 {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
 
-        /* Main Content */
-        .container {
-            max-width: 780px;
-            margin: 0 auto;
-            padding: 40px 24px;
-        }
+    /* Mode Buttons */
+    .mode-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-        article {
-            margin-bottom: 60px;
-        }
+    .mode-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg-card);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text);
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
 
-        article h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: #1e293b;
-            border-bottom: 3px solid #6366f1;
-            padding-bottom: 8px;
-        }
+    .mode-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--mode-color, var(--primary)), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
 
-        article h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 32px 0 12px;
-            color: #334155;
-        }
+    .mode-btn:hover {
+      border-color: var(--mode-color, var(--primary));
+      transform: translateX(3px);
+    }
 
-        article p {
-            font-size: 1.05rem;
-            margin-bottom: 20px;
-            color: #334155;
-            line-height: 1.9;
-        }
+    .mode-btn:hover::before { opacity: 0.08; }
 
-        article blockquote {
-            border-left: 4px solid #6366f1;
-            padding: 16px 24px;
-            margin: 24px 0;
-            background: #f0f0ff;
-            border-radius: 0 12px 12px 0;
-            font-style: italic;
-            color: #475569;
-        }
+    .mode-btn.active {
+      border-color: var(--mode-color, var(--primary));
+      box-shadow: 0 0 0 1px var(--mode-color, var(--primary)), 0 4px 20px rgba(0,0,0,0.3);
+    }
 
-        article ul,
-        article ol {
-            padding-left: 28px;
-            margin-bottom: 20px;
-        }
+    .mode-btn.active::before { opacity: 0.12; }
 
-        article li {
-            margin-bottom: 10px;
-            font-size: 1.05rem;
-            color: #334155;
-        }
+    .mode-btn.active .mode-status {
+      background: var(--mode-color, var(--primary));
+      color: #fff;
+    }
 
-        article img {
-            width: 100%;
-            border-radius: 12px;
-            margin: 24px 0;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+    .mode-icon-wrap {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.06);
+      font-size: 18px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
 
-        .callout {
-            background: linear-gradient(135deg, #ede9fe, #e0e7ff);
-            border: 1px solid #c4b5fd;
-            border-radius: 12px;
-            padding: 24px;
-            margin: 32px 0;
-        }
+    .mode-btn-text {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
 
-        .callout h4 {
-            color: #6366f1;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
-        }
+    .mode-btn-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+    }
 
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin: 32px 0;
-        }
+    .mode-btn-desc {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
 
-        .stat-card {
-            text-align: center;
-            padding: 24px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e2e8f0;
-        }
+    .mode-status {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      letter-spacing: 0.04em;
+    }
 
-        .stat-card .number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #6366f1;
-            line-height: 1;
-        }
+    /* Slider row */
+    .slider-section {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
 
-        .stat-card .label {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-top: 8px;
-        }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
 
-        .sidebar-info {
-            background: #fff7ed;
-            border: 1px solid #fed7aa;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 24px 0;
-            float: right;
-            width: 260px;
-            margin-left: 24px;
-        }
+    .slider-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
 
-        .sidebar-info h4 {
-            color: #c2410c;
-            margin-bottom: 8px;
-        }
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary);
+      height: 4px;
+    }
 
-        code {
-            background: #f1f5f9;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            color: #6366f1;
-        }
+    .slider-val {
+      font-size: 12px;
+      font-weight: 700;
+      color: #a5b4fc;
+      min-width: 40px;
+      text-align: right;
+    }
 
-        pre {
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 20px;
-            border-radius: 12px;
-            overflow-x: auto;
-            margin: 20px 0;
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
+    /* Focus toggle buttons */
+    .toggle-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+      font-weight: 500;
+    }
 
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 40px 24px;
-            background: #1e293b;
-            color: #94a3b8;
-        }
+    .toggle-btn.active {
+      border-color: var(--success);
+      background: rgba(34, 197, 94, 0.08);
+      color: #86efac;
+    }
 
-        footer h3 {
-            color: white;
-            margin-bottom: 8px;
-        }
+    .mini-toggle {
+      margin-left: auto;
+      width: 32px;
+      height: 18px;
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 9px;
+      position: relative;
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
+    .mini-toggle.on { background: var(--success); }
 
-            .stat-grid {
-                grid-template-columns: 1fr;
-            }
+    .mini-toggle-dot {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
 
-            .sidebar-info {
-                float: none;
-                width: 100%;
-                margin-left: 0;
-            }
-        }
-    </style>
+    .mini-toggle.on .mini-toggle-dot { transform: translateX(14px); }
+
+    /* Scroll controls */
+    .scroll-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .scroll-play-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .scroll-play-btn.active {
+      border-color: var(--accent);
+      background: rgba(34, 211, 238, 0.08);
+      color: #67e8f9;
+    }
+
+    .scroll-play-btn:hover { transform: scale(1.01); }
+
+    /* Theme buttons */
+    .theme-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .theme-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .theme-btn.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
+    }
+
+    .theme-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    /* Reset button */
+    .reset-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      border-radius: 10px;
+      background: transparent;
+      color: #f87171;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      background: rgba(248, 113, 113, 0.1);
+      border-color: #f87171;
+    }
+
+    /* ===== PREVIEW AREA ===== */
+    .preview-wrapper {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      background: rgba(30, 41, 59, 0.8);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+
+    .toolbar-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .toolbar-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+    }
+
+    .toolbar-dots span:nth-child(1) { background: #f87171; }
+    .toolbar-dots span:nth-child(2) { background: #fbbf24; }
+    .toolbar-dots span:nth-child(3) { background: #34d399; }
+
+    .toolbar-url {
+      font-size: 12px;
+      color: var(--text-muted);
+      flex: 1;
+      text-align: center;
+    }
+
+    .active-mode-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--primary);
+      color: white;
+      letter-spacing: 0.04em;
+    }
+
+    .preview-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 48px 64px;
+      transition: all 0.4s ease;
+      font-size: 18px;
+      line-height: 1.85;
+    }
+
+    .preview-area h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.3;
+    }
+
+    .demo-paragraph {
+      margin-bottom: 18px;
+      font-size: 17px;
+      line-height: 1.9;
+    }
+
+    .demo-article h2 { margin-bottom: 16px; }
+
+    /* Bionic reading */
+    .bionic-word strong {
+      font-weight: 800;
+    }
+
+    /* Word highlight mode */
+    .highlight-word { cursor: default; }
+    .highlight-word.active {
+      background: rgba(99, 102, 241, 0.25);
+      border-radius: 3px;
+      padding: 1px 2px;
+      color: #c7d2fe;
+      font-weight: 600;
+    }
+    .highlight-word.tts-active {
+      background: rgba(34, 211, 238, 0.25);
+      border-radius: 3px;
+      padding: 1px 2px;
+      color: #67e8f9;
+      font-weight: 600;
+      box-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
+    }
+    .highlight-word.read { color: var(--text-muted); }
+
+    /* Line focus mode */
+    .focus-sentence {
+      margin-bottom: 14px;
+      transition: all 0.3s ease;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border-left: 3px solid transparent;
+    }
+    .focus-sentence.focused {
+      background: rgba(99, 102, 241, 0.1);
+      border-left-color: var(--primary);
+      color: #e2e8f0;
+    }
+    .focus-sentence.read {
+      opacity: 0.4;
+    }
+
+    /* Focus mode demo */
+    .focus-mode-active .demo-ad,
+    .focus-mode-active .demo-sidebar {
+      display: none !important;
+    }
+
+    .demo-ad {
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px dashed rgba(251, 191, 36, 0.3);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .demo-sidebar {
+      background: rgba(248, 113, 113, 0.06);
+      border: 1px dashed rgba(248, 113, 113, 0.3);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* TTS styles */
+    .neuroread-tts-highlight {
+      background: rgba(34, 211, 238, 0.25);
+      border-radius: 3px;
+      padding: 1px 2px;
+    }
+  </style>
 </head>
 
 <body>
+  <!-- HEADER -->
+  <header class="demo-header">
+    <div class="demo-header-logo">
+      <span class="logo-emoji">🧠</span>
+      <h1>NeuroRead</h1>
+      <span class="demo-badge">Interactive Demo</span>
+    </div>
+    <div class="header-shortcuts">
+      <span class="shortcut-pill"><kbd>Alt</kbd>+<kbd>B</kbd> Bionic</span>
+      <span class="shortcut-pill"><kbd>Alt</kbd>+<kbd>L</kbd> Line Focus</span>
+      <span class="shortcut-pill"><kbd>Alt</kbd>+<kbd>H</kbd> Highlight</span>
+      <span class="shortcut-pill"><kbd>Alt</kbd>+<kbd>T</kbd> TTS</span>
+      <span class="shortcut-pill"><kbd>Alt</kbd>+<kbd>S</kbd> Scroll</span>
+    </div>
+  </header>
 
-    <!-- Hero Section -->
-    <div class="hero">
-        <h1>🧠 NeuroRead Demo Page</h1>
-        <p>Try the NeuroRead extension features on this content-rich page. Click the extension icon in your toolbar to
-            begin!</p>
-        <div class="hero-badge">
-            💡 Click the NeuroRead icon → Toggle features → See the magic
+  <div class="demo-layout">
+    <!-- CONTROL PANEL -->
+    <nav class="control-panel">
+      <!-- Reading Modes -->
+      <div class="panel-section">
+        <h3>Reading Modes</h3>
+        <div class="mode-buttons">
+          <button class="mode-btn" id="btn-bionic" data-mode="bionic" style="--mode-color: #7c3aed">
+            <div class="mode-icon-wrap">👁️</div>
+            <div class="mode-btn-text">
+              <span class="mode-btn-label">Bionic Reading</span>
+              <span class="mode-btn-desc">Bold word anchors</span>
+            </div>
+            <span class="mode-status" id="status-bionic">OFF</span>
+          </button>
+          <button class="mode-btn" id="btn-highlight" data-mode="highlight" style="--mode-color: #0891b2">
+            <div class="mode-icon-wrap">✨</div>
+            <div class="mode-btn-text">
+              <span class="mode-btn-label">Word Highlight</span>
+              <span class="mode-btn-desc">Follow words</span>
+            </div>
+            <span class="mode-status" id="status-highlight">OFF</span>
+          </button>
+          <button class="mode-btn" id="btn-focusline" data-mode="focus-line" style="--mode-color: #db2777">
+            <div class="mode-icon-wrap">📏</div>
+            <div class="mode-btn-text">
+              <span class="mode-btn-label">Line Focus</span>
+              <span class="mode-btn-desc">Sentence focus</span>
+            </div>
+            <span class="mode-status" id="status-focusline">OFF</span>
+          </button>
+          <button class="mode-btn" id="btn-tts" data-mode="tts" style="--mode-color: #ea580c">
+            <div class="mode-icon-wrap">🔊</div>
+            <div class="mode-btn-text">
+              <span class="mode-btn-label">Text to Speech</span>
+              <span class="mode-btn-desc">Read aloud</span>
+            </div>
+            <span class="mode-status" id="status-tts">OFF</span>
+          </button>
         </div>
+      </div>
+
+      <!-- Bionic intensity slider (shown when bionic active) -->
+      <div class="panel-section slider-section" id="bionic-slider-section" style="display:none">
+        <h3>Bold Intensity</h3>
+        <div class="slider-row">
+          <span class="slider-label">Light</span>
+          <input type="range" id="bionic-intensity" min="0.3" max="0.7" step="0.05" value="0.5">
+          <span class="slider-val" id="bionic-intensity-val">50%</span>
+          <span class="slider-label">Bold</span>
+        </div>
+      </div>
+
+      <!-- Focus Mode -->
+      <div class="panel-section">
+        <h3>Focus Mode</h3>
+        <button class="toggle-btn" id="btn-focus">
+          <span>🎯</span>
+          <span id="focus-label">Hide Distractions</span>
+          <div class="mini-toggle" id="focus-toggle">
+            <div class="mini-toggle-dot"></div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Auto Scroll -->
+      <div class="panel-section">
+        <h3>Auto Scroll</h3>
+        <div class="scroll-controls">
+          <button class="scroll-play-btn" id="btn-scroll">
+            <span id="scroll-icon">▶</span>
+            <span id="scroll-label">Start Scrolling</span>
+          </button>
+          <div class="slider-section" style="padding: 10px 12px;">
+            <div class="slider-row">
+              <span class="slider-label">Slow</span>
+              <input type="range" id="scroll-speed" min="0.3" max="3" step="0.1" value="0.8">
+              <span class="slider-label">Fast</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Themes -->
+      <div class="panel-section">
+        <h3>Themes</h3>
+        <div class="theme-buttons">
+          <button class="theme-btn active" data-theme="default">
+            <div class="theme-dot" style="background: #1e293b; border-color: #94a3b8;"></div>
+            Default
+          </button>
+          <button class="theme-btn" data-theme="sepia">
+            <div class="theme-dot" style="background: #2a2218; border-color: #d4c5a9;"></div>
+            Sepia
+          </button>
+          <button class="theme-btn" data-theme="dark">
+            <div class="theme-dot" style="background: #0a0a0a; border-color: #c8c8c8;"></div>
+            Pure Dark
+          </button>
+          <button class="theme-btn" data-theme="contrast">
+            <div class="theme-dot" style="background: #000; border-color: #fff;"></div>
+            High Contrast
+          </button>
+          <button class="theme-btn" data-theme="dyslexia">
+            <div class="theme-dot" style="background: #1a1a0e; border-color: #fde68a;"></div>
+            Dyslexia
+          </button>
+        </div>
+      </div>
+
+      <!-- Dyslexia -->
+      <div class="panel-section">
+        <h3>Accessibility</h3>
+        <button class="toggle-btn" id="btn-dyslexia">
+          <span>🔤</span>
+          <span>Dyslexia Spacing</span>
+          <div class="mini-toggle" id="dyslexia-toggle">
+            <div class="mini-toggle-dot"></div>
+          </div>
+        </button>
+      </div>
+
+      <button class="reset-btn" id="btn-reset">↺ Reset All</button>
+    </nav>
+
+    <!-- PREVIEW -->
+    <div class="preview-wrapper">
+      <div class="preview-toolbar">
+        <div class="toolbar-dots"><span></span><span></span><span></span></div>
+        <span class="toolbar-url">neuroread.app — Reading Demo</span>
+        <span class="active-mode-badge" id="active-badge" style="display:none">Active</span>
+      </div>
+
+      <div class="preview-area" id="preview" style="background:#0f172a; color:#e2e8f0;">
+        <div class="demo-article" id="article-content">
+          <h2>The Science of Accessible Reading</h2>
+
+          <div class="demo-ad" id="demo-ad">
+            📢 <strong>AD:</strong> Struggling to stay focused? Try our new supplement! — <em>(This distraction disappears in Focus Mode)</em>
+          </div>
+
+          <p class="demo-paragraph">Reading is a fundamental skill that opens doors to knowledge and opportunity. For millions of people with ADHD or Dyslexia, standard web content creates unnecessary barriers. Dense paragraphs, small fonts, and cluttered layouts cause reading fatigue and make it difficult to focus on what truly matters.</p>
+
+          <p class="demo-paragraph">NeuroRead changes this by adapting content to work with your brain rather than against it. Bionic Reading creates visual anchor points by bolding the first half of words, helping your eyes flow naturally through text and reducing cognitive load significantly.</p>
+
+          <div class="demo-sidebar" id="demo-sidebar">
+            📰 <strong>Trending:</strong> 10 things you won't believe happened today — <em>(This sidebar disappears in Focus Mode)</em>
+          </div>
+
+          <p class="demo-paragraph">Focus Mode strips away distractions, leaving only clean, readable content. Eye tracking follows your gaze to automatically scroll at your pace. Word Highlight guides you word-by-word, perfect for maintaining concentration when your mind wants to wander.</p>
+
+          <p class="demo-paragraph">These aren't just features — they're tools for inclusion and cognitive accessibility. When we make the web more readable, we lower barriers to education, employment, and everyday life. Information should never feel like a chore, and with NeuroRead, it doesn't have to be.</p>
+
+          <p class="demo-paragraph">Studies show that 15-20% of the global population has some form of reading difficulty. Yet the vast majority of digital content is designed without them in mind. NeuroRead bridges this gap by bringing powerful, science-backed tools directly to your browser — no downloads, no setup, just better reading.</p>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Feature Bar -->
-    <div class="feature-bar">
-        <div class="feature-tag">🔤 Bionic Reading</div>
-        <div class="feature-tag">🎯 Focus Mode</div>
-        <div class="feature-tag">📹 Eye Tracking</div>
-        <div class="feature-tag">📜 Auto Scroll</div>
-        <div class="feature-tag">🔊 Text to Speech</div>
-        <div class="feature-tag">✨ Word Highlight</div>
-        <div class="feature-tag">🎨 Dyslexia Font</div>
-    </div>
+  <script>
+    // ===========================
+    // Demo State
+    // ===========================
+    const state = {
+      activeMode: null,
+      focusMode: false,
+      isScrolling: false,
+      dyslexia: false,
+      theme: 'default',
+      bionicIntensity: 0.5,
+      scrollSpeed: 0.8,
+    };
 
-    <!-- Main Content -->
-    <main class="container">
+    const sampleText = document.getElementById('article-content').innerText;
+    const words = sampleText.split(/\s+/).filter(Boolean);
+    const sentences = sampleText.split(/(?<=[.!?])\s+/).filter(Boolean);
 
-        <!-- Article 1: The Problem -->
-        <article>
-            <h2>The Reading Crisis for Neurodivergent Minds</h2>
+    let highlightTimer = null;
+    let scrollTimer = null;
+    let ttsUtterance = null;
+    let highlightIndex = 0;
+    let focusLineIndex = 0;
+    let ttsWordIndex = -1;
 
-            <p>Most digital content on the internet today was designed with a single type of reader in mind: the
-                neurotypical user. Websites present dense blocks of text, small fonts, crowded layouts, and overwhelming
-                visual noise as the standard format for information delivery. For the estimated 1.5 billion people
-                worldwide who live with learning differences like ADHD, dyslexia, or other neurodivergent conditions,
-                this design paradigm creates an invisible but enormous barrier to accessing information.</p>
+    // ===========================
+    // Themes
+    // ===========================
+    const themes = {
+      default:   { bg: '#0f172a', text: '#e2e8f0' },
+      sepia:     { bg: '#2a2218', text: '#d4c5a9' },
+      dark:      { bg: '#0a0a0a', text: '#c8c8c8' },
+      contrast:  { bg: '#000000', text: '#ffffff' },
+      dyslexia:  { bg: '#1a1a0e', text: '#fde68a' },
+    };
 
-            <div class="stat-grid">
-                <div class="stat-card">
-                    <div class="number">20%</div>
-                    <div class="label">of people have a learning difference</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number">70%</div>
-                    <div class="label">of websites have accessibility issues</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number">1.5B</div>
-                    <div class="label">people affected globally</div>
-                </div>
-            </div>
+    // ===========================
+    // Utilities
+    // ===========================
+    function getPreview() { return document.getElementById('preview'); }
 
-            <p>When someone with ADHD tries to read a long article, their brain encounters what researchers call
-                "reading fatigue" — a state where the mental effort required to track lines of text, maintain focus, and
-                process information becomes so overwhelming that comprehension drops dramatically. Lines blur together,
-                the eye loses its place repeatedly, and what should be a simple act of reading becomes an exhausting
-                ordeal.</p>
+    function setActiveMode(mode) {
+      // Stop current mode
+      stopAllModes();
+      if (state.activeMode === mode) {
+        state.activeMode = null;
+        updateUI();
+        return;
+      }
+      state.activeMode = mode;
+      updateUI();
+      startMode(mode);
+    }
 
-            <blockquote>
-                "I can read the same paragraph five times and still not absorb what it says. It's not that I can't read
-                — it's that the way text is presented makes my brain work ten times harder than it needs to." — Sarah,
-                diagnosed with ADHD at age 27
-            </blockquote>
+    function stopAllModes() {
+      clearInterval(highlightTimer);
+      clearInterval(scrollTimer);
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      highlightTimer = null;
+      scrollTimer = null;
+      ttsWordIndex = -1;
+      highlightIndex = 0;
+      focusLineIndex = 0;
+    }
 
-            <p>For individuals with dyslexia, the challenges are different but equally significant. Letters may appear
-                to swap positions, words seem to dance on the page, and the spatial relationship between characters
-                becomes unreliable. Standard serif fonts like Times New Roman, which are still widely used across the
-                web, are particularly problematic because the decorative serifs create visual noise that interferes with
-                letter recognition.</p>
+    function startMode(mode) {
+      if (mode === 'bionic') renderBionic();
+      if (mode === 'highlight') startHighlight();
+      if (mode === 'focus-line') startLineFocus();
+      if (mode === 'tts') startTTS();
+    }
 
-            <h3>The Neurological Basis of Reading Difficulty</h3>
+    // ===========================
+    // BIONIC READING
+    // ===========================
+    function renderBionic() {
+      const intensity = state.bionicIntensity;
+      const html = words.map(word => {
+        const boldLen = Math.max(1, Math.ceil(word.length * intensity));
+        return `<span class="bionic-word"><strong>${escapeHtml(word.slice(0, boldLen))}</strong>${escapeHtml(word.slice(boldLen))} </span>`;
+      }).join('');
+      setPreviewContent(`<h2>The Science of Accessible Reading</h2><p class="demo-paragraph">${html}</p>`);
+    }
 
-            <p>Understanding why standard text presentation fails neurodivergent readers requires a brief look at how
-                the brain processes written language. When you read text, your brain performs several simultaneous
-                operations: visual pattern recognition for letter shapes, phonological processing to connect letters
-                with sounds, semantic processing to extract meaning, and motor control for eye movements called saccades
-                that jump from word to word.</p>
+    // ===========================
+    // WORD HIGHLIGHT
+    // ===========================
+    function startHighlight() {
+      highlightIndex = 0;
+      renderHighlight();
+      highlightTimer = setInterval(() => {
+        highlightIndex = (highlightIndex + 1) % words.length;
+        renderHighlight();
+      }, 350);
+    }
 
-            <p>In neurotypical readers, these processes work seamlessly in parallel. But in individuals with ADHD or
-                dyslexia, one or more of these processing channels operates differently. ADHD primarily affects the
-                executive function system that governs sustained attention and inhibitory control. This means an ADHD
-                reader's brain is constantly seeking novel stimulation, making it difficult to maintain focus on static
-                text. Every sidebar, advertisement, notification, and visual distraction on a webpage becomes a
-                potential trigger for attention shifting.</p>
+    function renderHighlight() {
+      const html = words.map((word, i) => {
+        let cls = 'highlight-word';
+        if (i === highlightIndex) cls += ' active';
+        else if (i < highlightIndex) cls += ' read';
+        return `<span class="${cls}">${escapeHtml(word)} </span>`;
+      }).join('');
+      setPreviewContent(`<h2>The Science of Accessible Reading</h2><p class="demo-paragraph">${html}</p>`);
+    }
 
-            <p>Dyslexia, on the other hand, primarily affects the phonological processing pathway. The brain has
-                difficulty efficiently mapping visual letter patterns to their corresponding sounds, which slows down
-                word recognition. This is compounded by the fact that many fonts used on the web have similar-looking
-                characters (like b/d, p/q, m/w) that can be easily confused when the phonological processing system is
-                working differently.</p>
+    // ===========================
+    // LINE FOCUS
+    // ===========================
+    function startLineFocus() {
+      focusLineIndex = 0;
+      renderLineFocus();
+      highlightTimer = setInterval(() => {
+        focusLineIndex = (focusLineIndex + 1) % sentences.length;
+        renderLineFocus();
+      }, 4500);
+    }
 
-            <div class="callout">
-                <h4>💡 Try This: Toggle Bionic Reading Mode</h4>
-                <p>Click the NeuroRead icon and enable Bionic Reading. Watch how bolding the first half of each word
-                    creates visual anchor points that guide your eye through this text. This technique significantly
-                    reduces the cognitive load required to track from word to word.</p>
-            </div>
-        </article>
+    function renderLineFocus() {
+      const html = sentences.map((sentence, i) => {
+        let cls = 'focus-sentence';
+        if (i === focusLineIndex) cls += ' focused';
+        else if (i < focusLineIndex) cls += ' read';
+        return `<p class="${cls}">${escapeHtml(sentence)}</p>`;
+      }).join('');
+      setPreviewContent(`<h2>The Science of Accessible Reading</h2>${html}`);
+    }
 
-        <!-- Article 2: The Solution -->
-        <article>
-            <h2>How NeuroRead Adapts Content to Your Brain</h2>
+    // ===========================
+    // TEXT TO SPEECH
+    // ===========================
+    function startTTS() {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
 
-            <p>NeuroRead takes a fundamentally different approach to web accessibility. Rather than asking
-                neurodivergent readers to adapt to content designed for neurotypical brains, NeuroRead adapts the
-                content to match the reader's neurological needs. This is done through a sophisticated Chrome extension
-                that applies multiple layers of reading assistance simultaneously.</p>
+      ttsWordIndex = 0;
+      const utterance = new SpeechSynthesisUtterance(sampleText);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      ttsUtterance = utterance;
 
-            <h3>Bionic Reading: Visual Anchors for the Eye</h3>
+      let wordCounter = 0;
+      utterance.onboundary = (e) => {
+        if (e.name === 'word') {
+          ttsWordIndex = wordCounter++;
+          renderTTS();
+        }
+      };
 
-            <p>The Bionic Reading feature works by analyzing each word on a page and automatically bolding the first
-                portion of every word. This creates what cognitive scientists call "visual fixation points" — strong
-                visual anchors that the eye can quickly lock onto during saccadic movements. Research shows that
-                experienced readers don't actually read every letter of every word; instead, they recognize word shapes
-                from their initial characters. Bionic Reading enhances this natural process by making the initial
-                characters more visually prominent.</p>
+      utterance.onend = () => {
+        state.activeMode = null;
+        ttsWordIndex = -1;
+        updateUI();
+        renderDefault();
+      };
 
-            <p>The intensity of the bolding effect is fully customizable. Some readers find that bolding the first 30%
-                of each word provides sufficient anchoring, while others prefer 50% or even 70% for maximum visual
-                guidance. The extension remembers your preference and applies it consistently across all websites.</p>
+      window.speechSynthesis.speak(utterance);
+      renderTTS();
+    }
 
-            <h3>Focus Mode: Eliminating Distractions</h3>
+    function renderTTS() {
+      const html = words.map((word, i) => {
+        let cls = 'highlight-word';
+        if (i === ttsWordIndex) cls += ' tts-active';
+        else if (i < ttsWordIndex) cls += ' read';
+        return `<span class="${cls}">${escapeHtml(word)} </span>`;
+      }).join('');
+      setPreviewContent(`<h2>The Science of Accessible Reading</h2><p class="demo-paragraph">${html}</p>`);
+    }
 
-            <p>For ADHD readers, environmental distractions are the primary enemy of sustained reading. Focus Mode
-                addresses this by intelligently identifying the main content of any webpage and presenting it in a
-                clean, distraction-free overlay. Advertisements, sidebars, navigation menus, comment sections, social
-                media widgets, and cookie banners are all hidden, leaving only the content you came to read.</p>
+    // ===========================
+    // FOCUS MODE
+    // ===========================
+    function toggleFocusMode() {
+      state.focusMode = !state.focusMode;
+      const preview = getPreview();
+      if (state.focusMode) {
+        preview.classList.add('focus-mode-active');
+        document.getElementById('demo-ad')?.classList.add('hidden');
+        document.getElementById('demo-sidebar')?.classList.add('hidden');
+      } else {
+        preview.classList.remove('focus-mode-active');
+        document.getElementById('demo-ad')?.classList.remove('hidden');
+        document.getElementById('demo-sidebar')?.classList.remove('hidden');
+      }
+      updateUI();
+    }
 
-            <p>The Focus Mode overlay includes its own controls for font size adjustment, theme switching, and a reading
-                progress bar that shows exactly how far through the article you've read. This progress indicator serves
-                a dual purpose: it provides a sense of accomplishment that motivates continued reading, and it helps
-                ADHD readers who frequently lose track of where they are in a document.</p>
+    // ===========================
+    // AUTO SCROLL
+    // ===========================
+    function toggleScroll() {
+      state.isScrolling = !state.isScrolling;
+      if (state.isScrolling) {
+        scrollTimer = setInterval(() => {
+          const preview = getPreview();
+          preview.scrollTop += state.scrollSpeed;
+          if (preview.scrollTop >= preview.scrollHeight - preview.clientHeight) {
+            preview.scrollTop = 0;
+          }
+        }, 50);
+      } else {
+        clearInterval(scrollTimer);
+        scrollTimer = null;
+      }
+      updateUI();
+    }
 
-            <div class="sidebar-info">
-                <h4>⚡ Quick Tip</h4>
-                <p>Press <code>Alt + F</code> to instantly toggle Focus Mode on any webpage. The keyboard shortcut works
-                    everywhere!</p>
-            </div>
+    // ===========================
+    // RENDER
+    // ===========================
+    function renderDefault() {
+      document.getElementById('article-content').innerHTML = `
+        <h2>The Science of Accessible Reading</h2>
+        <div class="demo-ad" id="demo-ad">📢 <strong>AD:</strong> Struggling to stay focused? — <em>(This disappears in Focus Mode)</em></div>
+        <p class="demo-paragraph">Reading is a fundamental skill that opens doors to knowledge and opportunity. For millions of people with ADHD or Dyslexia, standard web content creates unnecessary barriers. Dense paragraphs, small fonts, and cluttered layouts cause reading fatigue and make it difficult to focus.</p>
+        <p class="demo-paragraph">NeuroRead changes this by adapting content to work with your brain rather than against it. Bionic Reading creates visual anchor points by bolding the first half of words, helping your eyes flow naturally through text.</p>
+        <div class="demo-sidebar" id="demo-sidebar">📰 <strong>Sidebar:</strong> 10 things you won't believe — <em>(This disappears in Focus Mode)</em></div>
+        <p class="demo-paragraph">Focus Mode strips away distractions, leaving only clean, readable content. Word Highlight guides you word-by-word, perfect for maintaining concentration when your mind wants to wander.</p>
+        <p class="demo-paragraph">These aren't just features — they're tools for inclusion and cognitive accessibility. When we make the web more readable, we lower barriers to education, employment, and everyday life.</p>
+        <p class="demo-paragraph">Studies show that 15-20% of the global population has some form of reading difficulty. NeuroRead bridges this gap by bringing powerful, science-backed tools directly to your browser.</p>
+      `;
+    }
 
-            <h3>Eye Tracking: Hands-Free Reading</h3>
+    function setPreviewContent(html) {
+      const preview = getPreview();
+      // Remove old article-content and replace
+      const old = preview.querySelector('.demo-article');
+      if (old) {
+        old.innerHTML = html;
+      }
+    }
 
-            <p>Perhaps the most innovative feature of NeuroRead is its webcam-based eye tracking system. Using your
-                computer's built-in camera — no special hardware required — NeuroRead can detect the position of your
-                face and estimate where your eyes are focused on the screen. When it detects that you've reached the
-                bottom portion of the visible text, it automatically scrolls the page to reveal more content.</p>
+    function escapeHtml(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
 
-            <p>This hands-free reading capability is particularly valuable for readers who find that manual scrolling
-                interrupts their concentration. Every time you lift a hand from your lap to scroll, your brain must
-                shift from reading mode to motor control mode and back again. For many neurodivergent readers, this
-                context switch is enough to lose their place or break their train of thought. Eye-tracked auto-scroll
-                eliminates this interruption entirely.</p>
+    // ===========================
+    // UI UPDATE
+    // ===========================
+    function updateUI() {
+      const modes = ['bionic', 'highlight', 'focusline', 'tts'];
 
-            <h3>Adaptive Auto Scroll</h3>
+      // Mode buttons
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        const mode = btn.dataset.mode;
+        const isActive = state.activeMode === mode;
+        btn.classList.toggle('active', isActive);
+        const statusEl = btn.querySelector('.mode-status');
+        if (statusEl) statusEl.textContent = isActive ? 'ON' : 'OFF';
+      });
 
-            <p>Even without eye tracking, NeuroRead offers an intelligent auto-scroll feature that moves the page at a
-                customizable reading speed measured in words per minute. The default setting of 200 WPM matches the
-                average adult reading speed, but you can adjust it from 50 WPM for careful study to 800 WPM for rapid
-                scanning. The scroll speed can be changed on the fly using keyboard arrows, and pressing Space pauses or
-                resumes the scroll.</p>
+      // Badge
+      const badge = document.getElementById('active-badge');
+      if (state.activeMode) {
+        badge.style.display = 'inline-block';
+        const labels = {
+          bionic: '👁️ Bionic Active',
+          highlight: '✨ Highlight Active',
+          'focus-line': '📏 Line Focus Active',
+          tts: '🔊 TTS Active',
+        };
+        badge.textContent = labels[state.activeMode] || state.activeMode;
+      } else {
+        badge.style.display = 'none';
+      }
 
-            <h3>Text to Speech with Word Highlighting</h3>
+      // Bionic slider
+      const bionicSection = document.getElementById('bionic-slider-section');
+      bionicSection.style.display = state.activeMode === 'bionic' ? 'block' : 'none';
 
-            <p>The Text to Speech feature goes beyond simple screen reading by combining audio output with real-time
-                visual highlighting. As each word is spoken, it's simultaneously highlighted in the text with a soft
-                purple glow. This multi-modal approach — hearing the word while seeing it highlighted — creates
-                redundant processing channels that significantly improve comprehension and retention for neurodivergent
-                readers.</p>
+      // Focus mode button
+      const focusBtn = document.getElementById('btn-focus');
+      focusBtn.classList.toggle('active', state.focusMode);
+      document.getElementById('focus-label').textContent = state.focusMode ? 'Distractions Hidden' : 'Hide Distractions';
+      const focusToggle = document.getElementById('focus-toggle');
+      focusToggle.classList.toggle('on', state.focusMode);
 
-            <p>The speech synthesis uses the Web Speech API with support for multiple voices and adjustable speaking
-                rates from 0.5x to 3x normal speed. You can start reading from any point by selecting text, or read an
-                entire article with one click.</p>
+      // Scroll button
+      const scrollBtn = document.getElementById('btn-scroll');
+      scrollBtn.classList.toggle('active', state.isScrolling);
+      document.getElementById('scroll-icon').textContent = state.isScrolling ? '⏸' : '▶';
+      document.getElementById('scroll-label').textContent = state.isScrolling ? 'Pause Scrolling' : 'Start Scrolling';
 
-            <h3>Word Highlight Guide</h3>
+      // Dyslexia
+      const dyslexiaToggle = document.getElementById('dyslexia-toggle');
+      dyslexiaToggle.classList.toggle('on', state.dyslexia);
+      document.getElementById('btn-dyslexia').classList.toggle('active', state.dyslexia);
 
-            <p>The Word Highlight feature creates a visual reading ruler that follows your mouse cursor or advances
-                automatically. Think of it as a digital version of using a finger or ruler to track lines of text — a
-                technique that reading specialists have recommended for decades. The highlight can operate in three
-                modes: line mode (highlights the current line), word mode (highlights individual words), or paragraph
-                mode (highlights the current paragraph).</p>
+      // Theme buttons
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === state.theme);
+      });
 
-            <h3>Dyslexia-Friendly Themes</h3>
+      // Apply theme
+      const theme = themes[state.theme] || themes.default;
+      getPreview().style.background = theme.bg;
+      getPreview().style.color = theme.text;
 
-            <p>NeuroRead includes five carefully designed color themes, each optimized for different reading preferences
-                and conditions. The dyslexia-friendly theme uses the OpenDyslexic font, which features weighted
-                letterforms that help prevent the visual rotation and mirroring that dyslexic readers often experience.
-                Combined with increased line height, letter spacing, and word spacing, this theme transforms even the
-                most challenging text into something readable.</p>
-        </article>
+      // Apply dyslexia
+      const preview = getPreview();
+      if (state.dyslexia) {
+        preview.style.letterSpacing = '1.5px';
+        preview.style.wordSpacing = '4px';
+        preview.style.lineHeight = '2.2';
+      } else {
+        preview.style.letterSpacing = '';
+        preview.style.wordSpacing = '';
+        preview.style.lineHeight = '';
+      }
+    }
 
-        <!-- Article 3: Science -->
-        <article>
-            <h2>The Science Behind Accessible Reading</h2>
+    // ===========================
+    // EVENT LISTENERS
+    // ===========================
 
-            <p>The features in NeuroRead aren't just convenient — they're grounded in decades of cognitive science and
-                reading research. Understanding the evidence behind each feature helps explain why these approaches work
-                and why they matter.</p>
+    // Reading modes
+    document.getElementById('btn-bionic').addEventListener('click', () => setActiveMode('bionic'));
+    document.getElementById('btn-highlight').addEventListener('click', () => setActiveMode('highlight'));
+    document.getElementById('btn-focusline').addEventListener('click', () => setActiveMode('focus-line'));
+    document.getElementById('btn-tts').addEventListener('click', () => setActiveMode('tts'));
 
-            <h3>Cognitive Load Theory</h3>
+    // Bionic intensity
+    document.getElementById('bionic-intensity').addEventListener('input', (e) => {
+      state.bionicIntensity = parseFloat(e.target.value);
+      document.getElementById('bionic-intensity-val').textContent = Math.round(state.bionicIntensity * 100) + '%';
+      if (state.activeMode === 'bionic') renderBionic();
+    });
 
-            <p>Developed by John Sweller in 1988, Cognitive Load Theory describes how the brain's working memory has
-                limited capacity for processing new information. When the presentation of content creates unnecessary
-                cognitive demands — what Sweller calls "extraneous cognitive load" — less mental capacity remains for
-                actually understanding and remembering the content. Every distraction on a webpage, every confusing
-                layout choice, and every hard-to-read font increases extraneous cognitive load.</p>
+    // Focus mode
+    document.getElementById('btn-focus').addEventListener('click', toggleFocusMode);
 
-            <p>NeuroRead's Focus Mode directly addresses this by stripping away extraneous visual elements. The Bionic
-                Reading feature reduces the cognitive load of word recognition itself. And the consistent, clean themes
-                eliminate the mental overhead of adapting to different websites' design choices.</p>
+    // Scroll
+    document.getElementById('btn-scroll').addEventListener('click', toggleScroll);
+    document.getElementById('scroll-speed').addEventListener('input', (e) => {
+      state.scrollSpeed = parseFloat(e.target.value);
+    });
 
-            <h3>The Dual Coding Hypothesis</h3>
+    // Themes
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.theme = btn.dataset.theme;
+        updateUI();
+      });
+    });
 
-            <p>Allan Paivio's Dual Coding Theory proposes that information processed through both visual and auditory
-                channels simultaneously is remembered better than information processed through either channel alone.
-                NeuroRead's Text to Speech with word highlighting leverages this principle by creating synchronized
-                audio-visual processing. The reader hears each word while simultaneously seeing it highlighted, creating
-                two separate memory traces that reinforce each other.</p>
+    // Dyslexia
+    document.getElementById('btn-dyslexia').addEventListener('click', () => {
+      state.dyslexia = !state.dyslexia;
+      updateUI();
+    });
 
-            <blockquote>
-                "When we engage multiple sensory channels simultaneously, we don't just add processing capacity — we
-                multiply it. The whole becomes greater than the sum of its parts." — Dr. Richard Mayer, Principles of
-                Multimedia Learning
-            </blockquote>
+    // Reset
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      stopAllModes();
+      state.activeMode = null;
+      state.focusMode = false;
+      state.isScrolling = false;
+      state.dyslexia = false;
+      state.theme = 'default';
+      state.bionicIntensity = 0.5;
+      clearInterval(scrollTimer);
+      scrollTimer = null;
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      renderDefault();
+      getPreview().scrollTop = 0;
+      getPreview().classList.remove('focus-mode-active');
+      updateUI();
+    });
 
-            <h3>Saccadic Eye Movement Research</h3>
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (!e.altKey) return;
+      switch (e.key.toLowerCase()) {
+        case 'b': e.preventDefault(); setActiveMode('bionic'); break;
+        case 'h': e.preventDefault(); setActiveMode('highlight'); break;
+        case 'l': e.preventDefault(); setActiveMode('focus-line'); break;
+        case 't': e.preventDefault(); setActiveMode('tts'); break;
+        case 's': e.preventDefault(); toggleScroll(); break;
+        case 'f': e.preventDefault(); toggleFocusMode(); break;
+      }
+    });
 
-            <p>Reading researchers have extensively studied saccades — the rapid eye movements that jump from one
-                fixation point to the next during reading. Skilled readers make about 4-5 saccades per second, with each
-                fixation lasting 200-250 milliseconds. The Bionic Reading technique creates more prominent fixation
-                targets, allowing the eye to locate the next word more quickly and accurately. This reduces the
-                frequency of regression saccades (backward jumps that happen when the eye fails to land on the intended
-                word), which are a major source of reading slowdown for dyslexic readers.</p>
-
-            <p>Research published in the Journal of Eye Movement Research has shown that providing visual anchors at the
-                beginning of words can reduce regression saccades by up to 35% in readers with dyslexia, leading to
-                measurable improvements in reading speed and comprehension scores.</p>
-
-            <h3>Environmental Design for ADHD</h3>
-
-            <p>Environmental design research for ADHD consistently shows that reducing visual complexity and providing
-                clear structural hierarchy improves sustained attention. A 2019 study in the Journal of Attention
-                Disorders found that simplified visual environments led to a 40% improvement in sustained reading time
-                for adults with ADHD compared to typical cluttered web layouts.</p>
-
-            <p>NeuroRead's Focus Mode implements these findings by creating a controlled reading environment with
-                consistent typography, adequate white space, clear heading hierarchy, and zero visual distractions. The
-                reading progress bar provides the sense of structured forward movement that ADHD readers find
-                particularly motivating.</p>
-
-            <div class="callout">
-                <h4>🎯 Try This: Enable Multiple Features Together</h4>
-                <p>For the full NeuroRead experience, try enabling Bionic Reading + Word Highlight + Dyslexia Font
-                    simultaneously. Notice how each layer of assistance compounds the others to create a truly
-                    accessible reading experience.</p>
-            </div>
-
-            <h3>The Impact of Typography on Readability</h3>
-
-            <p>Typography research has identified several key factors that affect readability for neurodivergent
-                readers. The OpenDyslexic font, used in NeuroRead's Dyslexia theme, was specifically designed with
-                bottom-heavy weighted letterforms that help anchor letters visually and reduce the rotation and
-                mirroring effects commonly experienced by dyslexic readers.</p>
-
-            <p>Beyond font choice, spacing plays a critical role. Research by Zorzi et al., published in the Proceedings
-                of the National Academy of Sciences, demonstrated that simply increasing the spacing between letters
-                improved reading speed by more than 20% and halved the number of reading errors in dyslexic children.
-                NeuroRead applies similar spacing optimizations across all its dyslexia-friendly settings.</p>
-        </article>
-
-        <!-- Quick Reference -->
-        <article>
-            <h2>Keyboard Shortcuts Quick Reference</h2>
-
-            <p>Master these shortcuts to control NeuroRead without taking your hands off the keyboard:</p>
-
-            <ul>
-                <li><code>Alt + B</code> — Toggle Bionic Reading on/off</li>
-                <li><code>Alt + F</code> — Toggle Focus Mode on/off</li>
-                <li><code>Alt + S</code> — Toggle Auto Scroll on/off</li>
-                <li><code>Alt + T</code> — Toggle Text to Speech on/off</li>
-                <li><code>Alt + E</code> — Toggle Eye Tracking on/off</li>
-                <li><code>Shift + Esc</code> — Reset all features to default</li>
-                <li><code>Space</code> — Pause/Resume auto scroll</li>
-                <li><code>Arrow Up/Down</code> — Adjust scroll speed</li>
-            </ul>
-
-            <p>Right-click anywhere on a page to access NeuroRead features from the context menu. You can toggle Bionic
-                Reading, Focus Mode, read selected text aloud, or summarize the entire page with one click.</p>
-        </article>
-
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <h3>🧠 NeuroRead</h3>
-        <p>Making the web accessible for everyone</p>
-        <p style="margin-top: 12px; font-size: 0.85rem;">Built for Hack for Infinity – Infinity 2K26 Hackathon</p>
-    </footer>
-
+    // Init
+    updateUI();
+  </script>
 </body>
 
 </html>
