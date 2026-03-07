@@ -75,7 +75,7 @@ const Settings = () => {
     const defaultSettings = {
       bionic: { intensity: 0.5, enabled: true },
       focus: { hideAds: true, hideSidebars: true, hideComments: true },
-      scroll: { speed: 200, adaptive: true },
+      scroll: { speed: 100, adaptive: true },
       tts: { rate: 1.0, voice: 'default', highlightWords: true },
       theme: { defaultTheme: 'default', fontSize: 16, lineHeight: 1.6, letterSpacing: 0.5, wordSpacing: 0.1 }
     };

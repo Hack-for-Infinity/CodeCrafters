@@ -16,7 +16,7 @@ const LiveDemo = () => {
     const [bionicIntensity, setBionicIntensity] = useState(0.5);
     const [highlightIndex, setHighlightIndex] = useState(-1);
     const [focusLine, setFocusLine] = useState(-1);
-    const [scrollSpeed, setScrollSpeed] = useState(2);
+    const [scrollSpeed, setScrollSpeed] = useState(0.5);
     const [isAutoScrolling, setIsAutoScrolling] = useState(false);
     const [selectedTheme, setSelectedTheme] = useState('default');
     const [dyslexiaSpacing, setDyslexiaSpacing] = useState(false);
@@ -65,7 +65,7 @@ const LiveDemo = () => {
                     if (prev >= sentences.length - 1) return 0;
                     return prev + 1;
                 });
-            }, 2500);
+            }, 5000);
             return () => clearInterval(timer);
         } else {
             setFocusLine(-1);
@@ -82,7 +82,7 @@ const LiveDemo = () => {
                         scrollRef.current.scrollTop = 0;
                     }
                 }
-            }, 30);
+            }, 50);
         }
         return () => { if (scrollTimer.current) clearInterval(scrollTimer.current); };
     }, [isAutoScrolling, scrollSpeed]);
@@ -215,9 +215,9 @@ const LiveDemo = () => {
                                 <span className="speed-label">Speed</span>
                                 <input
                                     type="range"
-                                    min="1"
-                                    max="5"
-                                    step="0.5"
+                                    min="0.2"
+                                    max="2"
+                                    step="0.1"
                                     value={scrollSpeed}
                                     onChange={e => setScrollSpeed(parseFloat(e.target.value))}
                                 />
