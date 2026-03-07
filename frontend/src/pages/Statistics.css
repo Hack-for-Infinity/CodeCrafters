@@ -1,0 +1,344 @@
+/* Statistics - Premium Dark Theme */
+
+.statistics {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.statistics-header {
+  margin-bottom: 32px;
+}
+
+.statistics-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.statistics-header p {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Overview Section */
+.overview-section {
+  margin-bottom: 32px;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.overview-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all var(--transition-base);
+  animation: fadeInUp 0.5s ease both;
+}
+
+.overview-card:hover {
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.overview-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.overview-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.overview-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.overview-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+/* Activity Section */
+.activity-section {
+  margin-bottom: 32px;
+}
+
+.activity-section h2,
+.insights-section h2,
+.milestones-section h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.activity-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+
+.activity-chart {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 200px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.activity-bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  animation: fadeInUp 0.5s ease both;
+}
+
+.activity-bar-wrapper {
+  height: 150px;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  justify-content: center;
+}
+
+.activity-bar {
+  width: 36px;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  cursor: pointer;
+  min-height: 4px;
+}
+
+.activity-bar:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+}
+
+.activity-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  text-align: center;
+  line-height: 1.4;
+  z-index: 10;
+}
+
+.activity-bar:hover .activity-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.activity-label {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Insights Section */
+.insights-section {
+  margin-bottom: 32px;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.insight-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  transition: all var(--transition-base);
+}
+
+.insight-card:hover {
+  border-color: var(--border-glow);
+}
+
+.insight-icon {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.insight-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.insight-card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.insight-card strong {
+  color: var(--accent-tertiary);
+}
+
+.insight-detail {
+  font-size: 12px !important;
+  color: var(--text-muted) !important;
+  font-style: italic;
+}
+
+.insight-card ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.insight-card li {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+/* Milestones Section */
+.milestones-section {
+  margin-bottom: 20px;
+}
+
+.milestones-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.milestone-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-align: center;
+  opacity: 0.4;
+  transition: all var(--transition-base);
+  position: relative;
+  animation: fadeInUp 0.5s ease both;
+}
+
+.milestone-card.achieved {
+  opacity: 1;
+  border-color: rgba(124, 58, 237, 0.3);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.06), rgba(168, 85, 247, 0.04));
+}
+
+.milestone-card.achieved:hover {
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: var(--shadow-glow);
+}
+
+.milestone-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.milestone-card h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.milestone-card p {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.milestone-check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  background: var(--accent-emerald);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: white;
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .overview-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .milestones-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .milestones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-chart {
+    height: 150px;
+  }
+
+  .activity-bar-wrapper {
+    height: 110px;
+  }
+
+  .activity-bar {
+    width: 24px;
+  }
+}
