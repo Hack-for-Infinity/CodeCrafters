@@ -78,7 +78,7 @@ const Statistics = () => {
     <div className="statistics">
       <header className="statistics-header">
         <h1>Statistics</h1>
-        <p>Track your reading progress and achievements</p>
+        <p>Track your reading progress and achievements · <strong>{formatTime(stats.totalTime)}</strong> total focused time</p>
       </header>
 
       {/* Overview Cards */}
@@ -86,7 +86,7 @@ const Statistics = () => {
         <div className="overview-grid">
           {[
             { icon: BookOpen, label: 'Words Read', value: stats.totalWords, gradient: 'linear-gradient(135deg, #7c3aed, #a855f7)' },
-            { icon: Clock, label: 'Reading Time', value: stats.totalTime, suffix: 'm', gradient: 'linear-gradient(135deg, #22d3ee, #06b6d4)' },
+            { icon: Clock, label: 'Reading Time', value: stats.totalTime, suffix: '', displaySuffix: ` (${formatTime(stats.totalTime)})`, gradient: 'linear-gradient(135deg, #22d3ee, #06b6d4)' },
             { icon: TrendingUp, label: 'Avg WPM', value: stats.avgWPM, gradient: 'linear-gradient(135deg, #ec4899, #f43f5e)' },
             { icon: Calendar, label: 'Sessions', value: stats.totalSessions, gradient: 'linear-gradient(135deg, #34d399, #059669)' },
           ].map((item, i) => (
@@ -96,7 +96,7 @@ const Statistics = () => {
               </div>
               <div className="overview-info">
                 <span className="overview-value">
-                  <AnimatedCounter end={item.value} suffix={item.suffix || ''} />
+                  <AnimatedCounter end={item.value} suffix={item.suffix || ''} />{item.displaySuffix || ''}
                 </span>
                 <span className="overview-label">{item.label}</span>
               </div>
@@ -114,7 +114,7 @@ const Statistics = () => {
               <div key={index} className="activity-bar-container" style={{ animationDelay: `${index * 0.08}s` }}>
                 <div className="activity-bar-wrapper">
                   <div
-                    className="activity-bar"
+                    className={`activity-bar ${day.words === maxWords ? 'best-day' : ''}`}
                     style={{
                       height: `${Math.max(8, (day.words / maxWords) * 100)}%`,
                     }}

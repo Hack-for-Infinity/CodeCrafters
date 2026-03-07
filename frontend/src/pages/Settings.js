@@ -15,7 +15,7 @@ const Settings = () => {
       hideComments: true
     },
     scroll: {
-      speed: 200,
+      speed: 100,
       adaptive: true
     },
     tts: {
@@ -389,6 +389,24 @@ const Settings = () => {
                 onChange={(e) => handleChange('theme', 'letterSpacing', parseFloat(e.target.value))}
               />
               <span>{settings.theme.letterSpacing}px</span>
+            </div>
+          </div>
+
+          <div className="setting-item">
+            <div className="setting-info">
+              <label>Word Spacing</label>
+              <p>Space between words</p>
+            </div>
+            <div className="setting-control">
+              <input
+                type="range"
+                min="0"
+                max="0.5"
+                step="0.05"
+                value={settings.theme.wordSpacing}
+                onChange={(e) => handleChange('theme', 'wordSpacing', parseFloat(e.target.value))}
+              />
+              <span>{settings.theme.wordSpacing}em</span>
             </div>
           </div>
         </div>

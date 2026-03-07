@@ -135,6 +135,7 @@
     flex: 1;
     height: 4px;
     -webkit-appearance: none;
+    appearance: none;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 2px;
     outline: none;
@@ -142,6 +143,7 @@
 
 .slider-row input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
+    appearance: none;
     width: 14px;
     height: 14px;
     background: var(--accent-primary);
@@ -473,6 +475,76 @@
 
 .focus-sentence.read {
     opacity: 0.4;
+}
+
+/* TTS Highlight */
+.highlight-word.tts-active {
+    background: rgba(249, 115, 22, 0.3);
+    color: #f97316;
+    padding: 1px 3px;
+    font-weight: 700;
+    border-radius: 3px;
+    box-shadow: 0 0 8px rgba(249, 115, 22, 0.2);
+}
+
+/* Focus Mode Demo Elements */
+.demo-ad,
+.demo-sidebar-widget {
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.03);
+    transition: all 0.4s ease;
+}
+
+.demo-ad span,
+.demo-sidebar-widget span {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.5;
+}
+
+.demo-ad p,
+.demo-sidebar-widget p {
+    font-size: 13px;
+    opacity: 0.4;
+    margin-top: 4px;
+}
+
+.demo-ad.focus-hidden,
+.demo-sidebar-widget.focus-hidden {
+    opacity: 0.05;
+    transform: scale(0.95);
+    filter: blur(4px);
+    text-decoration: line-through;
+    pointer-events: none;
+}
+
+/* Focus Mode Button */
+.focus-mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    transition: all var(--transition-base);
+    font-family: 'Inter', sans-serif;
+}
+
+.focus-mode-btn.active {
+    background: rgba(34, 211, 238, 0.1);
+    border-color: rgba(34, 211, 238, 0.3);
+    color: var(--accent-cyan);
 }
 
 /* Keyboard Shortcuts Bar */

@@ -11,8 +11,10 @@ import {
   TrendingUp,
   Zap,
   Shield,
-  Palette
+  Palette,
+  ArrowRight
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import './Dashboard.css';
 
 /* Animated Counter Component */
@@ -38,7 +40,7 @@ const AnimatedCounter = ({ end, duration = 1500, suffix = '' }) => {
     return () => cancelAnimationFrame(animationFrame);
   }, [end, duration]);
 
-  return <span>{count}{suffix}</span>;
+  return <span>{count.toLocaleString()}{suffix}</span>;
 };
 
 const Dashboard = () => {
@@ -51,12 +53,64 @@ const Dashboard = () => {
     { id: 'highlight', name: 'Word Highlight', icon: Sparkles, active: false, description: 'Guide reading', color: '#fbbf24' },
   ]);
 
-  const toggleFeature = (featureId) => {
-    setFeatures(features.map(f =>
+  const [readingStats, setReadingStats] = useState({
+    avgWPM: 200,
+    readingTime: 47,
+    wordsRead: 12540,
+    sessions: 18
+  });
+
+  // Load feature states from Chrome storage on mount
+  useEffect(() => {
+    const loadState = async () => {
+      try {
+        const result = await chrome.storage.sync.get('neuroreadState');
+        if (result.neuroreadState) {
+          setFeatures(prev => prev.map(f => ({
+            ...f,
+            active: !!result.neuroreadState[f.id]
+          })));
+        }
+      } catch (e) {
+        console.log('Chrome storage not available');
+      }
+    };
+    loadState();
+  }, []);
+
+  // Load reading stats from Chrome storage
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const result = await chrome.storage.local.get(['readingStats']);
+        if (result.readingStats) {
+          setReadingStats({
+            avgWPM: result.readingStats.wpm || 200,
+            readingTime: result.readingStats.time || 47,
+            wordsRead: result.readingStats.words || 12540,
+            sessions: result.readingStats.sessions || 18
+          });
+        }
+      } catch (e) {
+        console.log('Using demo stats');
+      }
+    };
+    loadStats();
+  }, []);
+
+  const toggleFeature = async (featureId) => {
+    const updated = features.map(f =>
       f.id === featureId ? { ...f, active: !f.active } : f
-    ));
+    );
+    setFeatures(updated);
 
     try {
+      // Save to Chrome storage
+      const stateObj = {};
+      updated.forEach(f => { stateObj[f.id] = f.active; });
+      await chrome.storage.sync.set({ neuroreadState: stateObj });
+
+      // Notify content script
       chrome.runtime.sendMessage({
         action: 'toggleMode',
         mode: featureId,
@@ -68,10 +122,10 @@ const Dashboard = () => {
   };
 
   const stats = [
-    { icon: Activity, value: 200, suffix: '', label: 'Avg WPM', gradient: 'linear-gradient(135deg, #7c3aed, #a855f7)' },
-    { icon: Clock, value: 47, suffix: 'm', label: 'Reading Time', gradient: 'linear-gradient(135deg, #22d3ee, #06b6d4)' },
-    { icon: BookOpen, value: 12540, suffix: '', label: 'Words Read', gradient: 'linear-gradient(135deg, #ec4899, #f43f5e)' },
-    { icon: TrendingUp, value: 18, suffix: '', label: 'Sessions', gradient: 'linear-gradient(135deg, #34d399, #059669)' },
+    { icon: Activity, value: readingStats.avgWPM, suffix: '', label: 'Avg WPM', gradient: 'linear-gradient(135deg, #7c3aed, #a855f7)' },
+    { icon: Clock, value: readingStats.readingTime, suffix: 'm', label: 'Reading Time', gradient: 'linear-gradient(135deg, #22d3ee, #06b6d4)' },
+    { icon: BookOpen, value: readingStats.wordsRead, suffix: '', label: 'Words Read', gradient: 'linear-gradient(135deg, #ec4899, #f43f5e)' },
+    { icon: TrendingUp, value: readingStats.sessions, suffix: '', label: 'Sessions', gradient: 'linear-gradient(135deg, #34d399, #059669)' },
   ];
 
   return (
@@ -186,8 +240,12 @@ const Dashboard = () => {
       <section className="cta-section">
         <div className="cta-card">
           <div className="cta-content">
-            <h2>Ready to transform your reading?</h2>
-            <p>Navigate to any website, click the NeuroRead icon, and experience the difference.</p>
+            <h2>See it in action</h2>
+            <p>Try every feature interactively — no extension install needed for the demo.</p>
+            <Link to="/demo" className="cta-button">
+              <span>Try Live Demo</span>
+              <ArrowRight size={16} />
+            </Link>
             <div className="cta-stats">
               <div className="cta-stat">
                 <span className="cta-stat-value">6</span>

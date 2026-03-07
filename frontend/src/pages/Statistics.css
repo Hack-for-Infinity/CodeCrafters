@@ -143,6 +143,21 @@
   box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
 }
 
+.activity-bar.best-day {
+  background: linear-gradient(180deg, #fbbf24, #f97316);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+}
+
+.activity-bar.best-day::after {
+  content: '★';
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #fbbf24;
+}
+
 .activity-tooltip {
   position: absolute;
   bottom: calc(100% + 8px);

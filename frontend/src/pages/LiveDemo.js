@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     Type, Sparkles, ScanLine, Palette, Play, Pause,
-    RotateCcw, Zap, Monitor
+    RotateCcw, Zap, Monitor, Volume2, Eye, Square
 } from 'lucide-react';
 import './LiveDemo.css';
 
@@ -20,9 +20,13 @@ const LiveDemo = () => {
     const [isAutoScrolling, setIsAutoScrolling] = useState(false);
     const [selectedTheme, setSelectedTheme] = useState('default');
     const [dyslexiaSpacing, setDyslexiaSpacing] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const [ttsWordIndex, setTtsWordIndex] = useState(-1);
+    const [focusModeOn, setFocusModeOn] = useState(false);
     const scrollRef = useRef(null);
     const highlightTimer = useRef(null);
     const scrollTimer = useRef(null);
+    const utteranceRef = useRef(null);
 
     const words = sampleText.split(/\s+/);
     const sentences = sampleText.split(/(?<=[.!?])\s+/);
@@ -48,7 +52,7 @@ const LiveDemo = () => {
                     if (prev >= words.length - 1) return 0;
                     return prev + 1;
                 });
-            }, 300);
+            }, 400);
         } else {
             setHighlightIndex(-1);
             if (highlightTimer.current) clearInterval(highlightTimer.current);
@@ -87,13 +91,109 @@ const LiveDemo = () => {
         return () => { if (scrollTimer.current) clearInterval(scrollTimer.current); };
     }, [isAutoScrolling, scrollSpeed]);
 
+    // TTS - Text to Speech
+    const startTTS = useCallback(() => {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(sampleText);
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        utteranceRef.current = utterance;
+
+        // Track word boundaries
+        let wordCounter = 0;
+        utterance.onboundary = (event) => {
+            if (event.name === 'word') {
+                setTtsWordIndex(wordCounter);
+                wordCounter++;
+            }
+        };
+
+        utterance.onend = () => {
+            setIsSpeaking(false);
+            setTtsWordIndex(-1);
+            setActiveMode(null);
+        };
+
+        window.speechSynthesis.speak(utterance);
+        setIsSpeaking(true);
+    }, []);
+
+    const stopTTS = useCallback(() => {
+        window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+        setTtsWordIndex(-1);
+    }, []);
+
+    // Clean up TTS on unmount or mode change
+    useEffect(() => {
+        if (activeMode !== 'tts' && isSpeaking) {
+            stopTTS();
+        }
+    }, [activeMode, isSpeaking, stopTTS]);
+
+    useEffect(() => {
+        return () => { window.speechSynthesis.cancel(); };
+    }, []);
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handler = (e) => {
+            if (e.altKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'b':
+                        e.preventDefault();
+                        setActiveMode(prev => prev === 'bionic' ? null : 'bionic');
+                        break;
+                    case 'h':
+                        e.preventDefault();
+                        setActiveMode(prev => prev === 'highlight' ? null : 'highlight');
+                        break;
+                    case 'l':
+                        e.preventDefault();
+                        setActiveMode(prev => prev === 'focus-line' ? null : 'focus-line');
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        setActiveMode(prev => {
+                            if (prev === 'tts') {
+                                stopTTS();
+                                return null;
+                            }
+                            return 'tts';
+                        });
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        setIsAutoScrolling(prev => !prev);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [stopTTS]);
+
+    // Start TTS when mode activates
+    useEffect(() => {
+        if (activeMode === 'tts' && !isSpeaking) {
+            startTTS();
+        }
+    }, [activeMode, isSpeaking, startTTS]);
+
     const resetAll = () => {
+        stopTTS();
         setActiveMode(null);
         setIsAutoScrolling(false);
         setSelectedTheme('default');
         setDyslexiaSpacing(false);
+        setFocusModeOn(false);
         setHighlightIndex(-1);
         setFocusLine(-1);
+        setTtsWordIndex(-1);
         if (scrollRef.current) scrollRef.current.scrollTop = 0;
     };
 
@@ -109,6 +209,7 @@ const LiveDemo = () => {
         { id: 'bionic', icon: Type, label: 'Bionic Reading', desc: 'Bold anchors', color: '#7c3aed' },
         { id: 'highlight', icon: Sparkles, label: 'Word Highlight', desc: 'Follow words', color: '#22d3ee' },
         { id: 'focus-line', icon: ScanLine, label: 'Line Focus', desc: 'Sentence focus', color: '#ec4899' },
+        { id: 'tts', icon: Volume2, label: 'Text to Speech', desc: 'Read aloud', color: '#f97316' },
     ];
 
     const getThemeStyle = () => ({
@@ -121,13 +222,15 @@ const LiveDemo = () => {
             return <p className="demo-paragraph">{renderBionic()}</p>;
         }
 
-        if (activeMode === 'highlight') {
+        if (activeMode === 'highlight' || activeMode === 'tts') {
+            const currentIndex = activeMode === 'tts' ? ttsWordIndex : highlightIndex;
+            const activeClass = activeMode === 'tts' ? 'tts-active' : 'active';
             return (
                 <p className="demo-paragraph">
                     {words.map((word, i) => (
                         <span
                             key={i}
-                            className={`highlight-word ${i === highlightIndex ? 'active' : ''} ${i < highlightIndex ? 'read' : ''}`}
+                            className={`highlight-word ${i === currentIndex ? activeClass : ''} ${i < currentIndex ? 'read' : ''}`}
                         >
                             {word}{' '}
                         </span>
@@ -147,7 +250,35 @@ const LiveDemo = () => {
             ));
         }
 
-        return <p className="demo-paragraph">{sampleText}</p>;
+        return (
+            <>
+                <p className="demo-paragraph">{sampleText}</p>
+                {focusModeOn && (
+                    <>
+                        <div className="demo-ad focus-hidden">
+                            <span>📢 ADVERTISEMENT</span>
+                            <p>Buy stuff you don't need!</p>
+                        </div>
+                        <div className="demo-sidebar-widget focus-hidden">
+                            <span>📰 Trending</span>
+                            <p>10 things you won't believe...</p>
+                        </div>
+                    </>
+                )}
+                {!focusModeOn && (
+                    <>
+                        <div className="demo-ad">
+                            <span>📢 ADVERTISEMENT</span>
+                            <p>Buy stuff you don't need!</p>
+                        </div>
+                        <div className="demo-sidebar-widget">
+                            <span>📰 Trending</span>
+                            <p>10 things you won't believe...</p>
+                        </div>
+                    </>
+                )}
+            </>
+        );
     };
 
     return (
@@ -171,13 +302,23 @@ const LiveDemo = () => {
                                 <button
                                     key={mode.id}
                                     className={`mode-btn ${activeMode === mode.id ? 'active' : ''}`}
-                                    onClick={() => setActiveMode(activeMode === mode.id ? null : mode.id)}
+                                    onClick={() => {
+                                        if (activeMode === mode.id) {
+                                            if (mode.id === 'tts') stopTTS();
+                                            setActiveMode(null);
+                                        } else {
+                                            if (isSpeaking) stopTTS();
+                                            setActiveMode(mode.id);
+                                        }
+                                    }}
                                     style={{ '--mode-color': mode.color }}
                                 >
-                                    <mode.icon size={18} />
+                                    {activeMode === mode.id && mode.id === 'tts' ? <Square size={18} /> : <mode.icon size={18} />}
                                     <div className="mode-btn-text">
                                         <span className="mode-btn-label">{mode.label}</span>
-                                        <span className="mode-btn-desc">{mode.desc}</span>
+                                        <span className="mode-btn-desc">
+                                            {activeMode === mode.id && mode.id === 'tts' ? 'Stop speaking' : mode.desc}
+                                        </span>
                                     </div>
                                 </button>
                             ))}
@@ -200,6 +341,23 @@ const LiveDemo = () => {
                             </div>
                         </div>
                     )}
+
+                    <div className="panel-section">
+                        <h3>Focus Mode</h3>
+                        <button
+                            className={`focus-mode-btn ${focusModeOn ? 'active' : ''}`}
+                            onClick={() => {
+                                setFocusModeOn(!focusModeOn);
+                                if (activeMode) { setActiveMode(null); if (isSpeaking) stopTTS(); }
+                            }}
+                        >
+                            <Eye size={16} />
+                            <span>{focusModeOn ? 'Distractions Hidden' : 'Hide Distractions'}</span>
+                            <div className={`mini-toggle ${focusModeOn ? 'on' : ''}`}>
+                                <div className="mini-toggle-dot"></div>
+                            </div>
+                        </button>
+                    </div>
 
                     <div className="panel-section">
                         <h3>Auto Scroll</h3>
@@ -265,7 +423,7 @@ const LiveDemo = () => {
                 {/* Preview Area */}
                 <div
                     ref={scrollRef}
-                    className="preview-area"
+                    className={`preview-area ${focusModeOn ? 'focus-mode-active' : ''}`}
                     style={{
                         ...getThemeStyle(),
                         ...(dyslexiaSpacing ? {
@@ -297,9 +455,10 @@ const LiveDemo = () => {
             <div className="shortcuts-bar">
                 <span className="shortcut-title">Keyboard Shortcuts:</span>
                 <div className="shortcut-item"><kbd>Alt</kbd>+<kbd>B</kbd> Bionic</div>
-                <div className="shortcut-item"><kbd>Alt</kbd>+<kbd>F</kbd> Focus</div>
-                <div className="shortcut-item"><kbd>Alt</kbd>+<kbd>S</kbd> Scroll</div>
+                <div className="shortcut-item"><kbd>Alt</kbd>+<kbd>H</kbd> Highlight</div>
+                <div className="shortcut-item"><kbd>Alt</kbd>+<kbd>L</kbd> Line Focus</div>
                 <div className="shortcut-item"><kbd>Alt</kbd>+<kbd>T</kbd> TTS</div>
+                <div className="shortcut-item"><kbd>Alt</kbd>+<kbd>S</kbd> Scroll</div>
             </div>
         </div>
     );

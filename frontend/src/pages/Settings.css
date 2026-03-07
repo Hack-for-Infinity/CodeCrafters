@@ -219,15 +219,17 @@
 .toggle-switch {
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 24px;
+  width: 48px;
+  height: 26px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .toggle-switch input {
   opacity: 0;
   width: 0;
   height: 0;
+  position: absolute;
 }
 
 .toggle-slider {
@@ -236,31 +238,44 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 26px;
   transition: all var(--transition-base);
 }
 
 .toggle-slider::after {
   content: '';
   position: absolute;
-  width: 18px;
-  height: 18px;
-  background: var(--text-secondary);
+  width: 20px;
+  height: 20px;
+  background: #94a3b8;
   border-radius: 50%;
-  top: 3px;
+  top: 2px;
   left: 3px;
   transition: all var(--transition-base);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .toggle-switch input:checked+.toggle-slider {
   background: var(--accent-primary);
-  box-shadow: 0 0 12px rgba(124, 58, 237, 0.3);
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.4);
 }
 
 .toggle-switch input:checked+.toggle-slider::after {
-  transform: translateX(20px);
+  transform: translateX(22px);
   background: white;
+  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.3);
+}
+
+.toggle-switch:hover .toggle-slider {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.toggle-switch:hover input:checked+.toggle-slider {
+  background: var(--accent-secondary);
 }
 
 /* Action Buttons */

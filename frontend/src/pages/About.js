@@ -117,7 +117,7 @@ const About = () => {
       {/* Links */}
       <section className="links-section">
         <div className="links-grid">
-          <a href="https://github.com" className="link-card" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/neuroread" className="link-card" target="_blank" rel="noopener noreferrer">
             <Github size={20} />
             <span>GitHub</span>
             <ExternalLink size={14} />
