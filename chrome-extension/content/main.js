@@ -28,9 +28,9 @@ class NeuroRead {
 
   async init() {
     if (this.isInitialized) return;
-    
+
     console.log('🧠 NeuroRead initializing...');
-    
+
     // Initialize feature modules
     this.features.bionic = new BionicReading();
     this.features.focus = new FocusMode();
@@ -42,16 +42,16 @@ class NeuroRead {
 
     // Load saved state
     await this.loadState();
-    
+
     // Setup message listener
     this.setupMessageListener();
-    
+
     // Setup keyboard shortcuts
     this.setupKeyboardShortcuts();
-    
+
     // Inject NeuroRead container
     this.injectContainer();
-    
+
     this.isInitialized = true;
     console.log('✅ NeuroRead initialized successfully');
   }
@@ -61,7 +61,7 @@ class NeuroRead {
       const result = await chrome.storage.sync.get('neuroreadState');
       if (result.neuroreadState) {
         this.state = { ...this.state, ...result.neuroreadState };
-        
+
         // Apply saved states
         Object.keys(this.state).forEach(key => {
           if (this.state[key] && this.features[key]) {
@@ -77,48 +77,59 @@ class NeuroRead {
   setupMessageListener() {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log('Message received:', request.action);
-      
+
       switch (request.action) {
         case 'toggleMode':
           this.toggleMode(request.mode, request.enabled);
           sendResponse({ success: true });
           break;
-          
+
         case 'toggleFeature':
           this.toggleFeature(request.feature, request.enabled);
           sendResponse({ success: true });
           break;
-          
+
         case 'setTheme':
           this.setTheme(request.theme);
           sendResponse({ success: true });
           break;
-          
+
         case 'speakText':
           this.features.tts.speak(request.text);
           sendResponse({ success: true });
           break;
-          
+
         case 'summarizePage':
           this.summarizePage();
           sendResponse({ success: true });
           break;
-          
+
         case 'requestCamera':
           this.features.eye.requestCameraPermission();
           sendResponse({ success: true });
           break;
-          
+
         case 'resetAll':
           this.resetAll();
           sendResponse({ success: true });
           break;
-          
+
         case 'getState':
           sendResponse({ state: this.state });
           break;
+
+        case 'setScrollSpeed':
+          if (this.features.scroll && this.features.scroll.targetWPM !== undefined) {
+            this.features.scroll.targetWPM = request.speed;
+            if (this.features.scroll.controlsOverlay) {
+              const speedVal = this.features.scroll.controlsOverlay.querySelector('.speed-value');
+              if (speedVal) speedVal.textContent = request.speed;
+            }
+          }
+          sendResponse({ success: true });
+          break;
       }
-      
+
       return true;
     });
   }
@@ -187,9 +198,9 @@ class NeuroRead {
       transition: all 0.3s ease;
       pointer-events: none;
     `;
-    
+
     document.body.appendChild(indicator);
-    
+
     // Show indicator when features are active
     this.updateIndicator();
   }
@@ -197,13 +208,13 @@ class NeuroRead {
   updateIndicator() {
     const indicator = document.getElementById('neuroread-indicator');
     if (!indicator) return;
-    
+
     const activeFeatures = Object.keys(this.state).filter(key => this.state[key]);
-    
+
     if (activeFeatures.length > 0) {
       indicator.style.opacity = '1';
       indicator.style.transform = 'translateY(0)';
-      indicator.querySelector('.neuroread-status').textContent = 
+      indicator.querySelector('.neuroread-status').textContent =
         `${activeFeatures.length} mode${activeFeatures.length > 1 ? 's' : ''} active`;
     } else {
       indicator.style.opacity = '0';
@@ -213,35 +224,35 @@ class NeuroRead {
 
   toggleMode(mode, enabled = null) {
     if (!this.features[mode]) return;
-    
+
     const newState = enabled !== null ? enabled : !this.state[mode];
     this.state[mode] = newState;
-    
+
     if (newState) {
       this.features[mode].enable();
     } else {
       this.features[mode].disable();
     }
-    
+
     this.saveState();
     this.updateIndicator();
-    
+
     // Show toast notification
     this.showToast(`${mode.charAt(0).toUpperCase() + mode.slice(1)} ${newState ? 'enabled' : 'disabled'}`);
   }
 
   toggleFeature(feature, enabled = null) {
     if (!this.features[feature]) return;
-    
+
     const newState = enabled !== null ? enabled : !this.state[feature];
     this.state[feature] = newState;
-    
+
     if (newState) {
       this.features[feature].enable();
     } else {
       this.features[feature].disable();
     }
-    
+
     this.saveState();
     this.updateIndicator();
   }
@@ -266,7 +277,7 @@ class NeuroRead {
         this.features[key].disable();
       }
     });
-    
+
     this.state = {
       bionic: false,
       focus: false,
@@ -277,7 +288,7 @@ class NeuroRead {
       dyslexia: false,
       theme: 'default'
     };
-    
+
     this.saveState();
     this.updateIndicator();
     this.showToast('All modes reset');
@@ -301,9 +312,9 @@ class NeuroRead {
       z-index: 9999999;
       animation: neuroread-toast-in 0.3s ease;
     `;
-    
+
     document.body.appendChild(toast);
-    
+
     setTimeout(() => {
       toast.style.animation = 'neuroread-toast-out 0.3s ease';
       setTimeout(() => toast.remove(), 300);

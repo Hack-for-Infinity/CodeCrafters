@@ -64,6 +64,24 @@ class NeuroReadPopup {
     document.getElementById('btn-settings').addEventListener('click', () => {
       chrome.tabs.create({ url: chrome.runtime.getURL('settings.html') });
     });
+    document.getElementById('btn-demo').addEventListener('click', () => {
+      chrome.tabs.create({ url: chrome.runtime.getURL('demo-page.html') });
+    });
+
+    // Scroll speed slider
+    const speedSlider = document.getElementById('scroll-speed-slider');
+    const speedValue = document.getElementById('scroll-speed-value');
+    speedSlider.addEventListener('input', async (e) => {
+      const wpm = parseInt(e.target.value);
+      speedValue.textContent = wpm + ' WPM';
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab) {
+        chrome.tabs.sendMessage(tab.id, {
+          action: 'setScrollSpeed',
+          speed: wpm
+        });
+      }
+    });
   }
 
   updateUI() {
@@ -81,6 +99,12 @@ class NeuroReadPopup {
     document.querySelectorAll('.theme-btn').forEach(btn => {
       btn.classList.toggle('active', this.state.theme === btn.dataset.theme);
     });
+
+    // Show/hide speed section when scroll is active
+    const speedSection = document.getElementById('speed-section');
+    if (speedSection) {
+      speedSection.style.display = this.state.scroll ? 'block' : 'none';
+    }
   }
 
   async toggleMode(mode) {

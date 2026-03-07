@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NeuroRead</title>
   <link rel="stylesheet" href="popup.css">
 </head>
+
 <body>
   <div class="neuroread-popup">
     <header class="popup-header">
@@ -75,6 +77,21 @@
         </div>
       </section>
 
+      <!-- Auto Scroll Speed -->
+      <section class="speed-section" id="speed-section" style="display: none;">
+        <h2>📜 Scroll Speed</h2>
+        <div
+          style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--bg-card, #f8fafc); border-radius: 10px; border: 1px solid var(--border, #e2e8f0);">
+          <span style="font-size: 12px; color: var(--text-muted, #94a3b8);">Slow</span>
+          <input type="range" id="scroll-speed-slider" min="50" max="800" step="10" value="200"
+            style="flex: 1; accent-color: #6366f1;">
+          <span style="font-size: 12px; color: var(--text-muted, #94a3b8);">Fast</span>
+          <span id="scroll-speed-value"
+            style="min-width: 60px; text-align: center; font-weight: 700; color: var(--primary, #6366f1); font-size: 14px;">200
+            WPM</span>
+        </div>
+      </section>
+
       <!-- AI Summarizer -->
       <section class="ai-section">
         <h2>🤖 AI Assistant</h2>
@@ -126,11 +143,13 @@
     </main>
 
     <footer class="popup-footer">
-      <button class="settings-btn" id="btn-settings">⚙️ Advanced Settings</button>
-      <button class="reset-btn" id="btn-reset">Reset All</button>
+      <button class="settings-btn" id="btn-settings">⚙️ Settings</button>
+      <button class="settings-btn" id="btn-demo" style="flex: 0.8;">🎯 Demo</button>
+      <button class="reset-btn" id="btn-reset">Reset</button>
     </footer>
   </div>
 
   <script src="popup.js"></script>
 </body>
+
 </html>

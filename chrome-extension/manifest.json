@@ -8,7 +8,9 @@
     "storage",
     "scripting",
     "tabs",
-    "offscreen"
+    "offscreen",
+    "contextMenus",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -26,7 +28,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "<all_urls>"
+      ],
       "js": [
         "lib/webgazer.js",
         "content/bionic-reading.js",
@@ -54,15 +58,38 @@
         "lib/*",
         "styles/*",
         "assets/*",
-        "offscreen.html"
+        "offscreen.html",
+        "demo-page.html"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "commands": {
+    "toggle-bionic": {
+      "suggested_key": {
+        "default": "Alt+B"
+      },
+      "description": "Toggle Bionic Reading"
+    },
+    "toggle-focus": {
+      "suggested_key": {
+        "default": "Alt+F"
+      },
+      "description": "Toggle Focus Mode"
+    },
+    "toggle-tts": {
+      "suggested_key": {
+        "default": "Alt+T"
+      },
+      "description": "Toggle Text to Speech"
+    }
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
