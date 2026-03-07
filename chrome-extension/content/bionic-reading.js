@@ -65,7 +65,7 @@ class BionicReading {
             return NodeFilter.FILTER_REJECT;
           }
           
-          if (parent.closest('.neuroread-*') || parent.closest('#neuroread-*')) {
+          if (this.isNeuroReadElement(parent) || parent.closest('[id^="neuroread-"], [class^="neuroread-"]')) {
             return NodeFilter.FILTER_REJECT;
           }
           
@@ -183,7 +183,7 @@ class BionicReading {
 
   processNewElement(element) {
     // Skip our own elements
-    if (element.classList && element.classList.contains('neuroread-*')) return;
+    if (this.isNeuroReadElement(element) || element.closest?.('[id^="neuroread-"], [class^="neuroread-"]')) return;
     
     // Get all text nodes within this element
     const walker = document.createTreeWalker(
@@ -207,6 +207,12 @@ class BionicReading {
       this.restoreOriginalText();
       this.processDocument();
     }
+  }
+
+  isNeuroReadElement(element) {
+    if (!element || !element.classList) return false;
+    if (element.id && element.id.startsWith('neuroread-')) return true;
+    return Array.from(element.classList).some(cls => cls.startsWith('neuroread-'));
   }
 }
 

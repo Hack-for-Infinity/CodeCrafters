@@ -36,6 +36,7 @@
         "content/bionic-reading.js",
         "content/focus-mode.js",
         "content/eye-tracker.js",
+        "content/line-focus.js",
         "content/auto-scroll.js",
         "content/text-to-speech.js",
         "content/word-highlight.js",
@@ -47,6 +48,7 @@
         "styles/focus-mode.css",
         "styles/dyslexia-theme.css",
         "styles/eye-tracker.css",
+        "styles/line-focus.css",
         "styles/word-highlight.css"
       ],
       "run_at": "document_end"
@@ -83,6 +85,12 @@
         "default": "Alt+F"
       },
       "description": "Toggle Focus Mode"
+    },
+    "toggle-line-focus": {
+      "suggested_key": {
+        "default": "Alt+L"
+      },
+      "description": "Toggle Line Focus"
     },
     "toggle-tts": {
       "suggested_key": {

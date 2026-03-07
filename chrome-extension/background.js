@@ -11,6 +11,7 @@ chrome.runtime.onInstalled.addListener((details) => {
       neuroreadState: {
         bionic: false,
         focus: false,
+        lineFocus: false,
         eye: false,
         scroll: false,
         tts: false,
@@ -72,6 +73,13 @@ function createContextMenu() {
     });
 
     chrome.contextMenus.create({
+      id: 'toggle-line-focus',
+      parentId: 'neuroread-parent',
+      title: 'Toggle Line Focus',
+      contexts: ['all']
+    });
+
+    chrome.contextMenus.create({
       id: 'toggle-tts',
       parentId: 'neuroread-parent',
       title: 'Read Selected Text',
@@ -95,6 +103,9 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       break;
     case 'toggle-focus':
       chrome.tabs.sendMessage(tab.id, { action: 'toggleMode', mode: 'focus' });
+      break;
+    case 'toggle-line-focus':
+      chrome.tabs.sendMessage(tab.id, { action: 'toggleMode', mode: 'lineFocus' });
       break;
     case 'toggle-tts':
       chrome.tabs.sendMessage(tab.id, { 
@@ -213,6 +224,9 @@ chrome.commands.onCommand.addListener((command, tab) => {
       break;
     case 'toggle-focus':
       chrome.tabs.sendMessage(tab.id, { action: 'toggleMode', mode: 'focus' });
+      break;
+    case 'toggle-line-focus':
+      chrome.tabs.sendMessage(tab.id, { action: 'toggleMode', mode: 'lineFocus' });
       break;
     case 'toggle-tts':
       chrome.tabs.sendMessage(tab.id, { action: 'toggleFeature', feature: 'tts' });

@@ -310,7 +310,7 @@ class TextToSpeech {
       
       if (regex.test(text)) {
         const parent = node.parentElement;
-        if (parent && !parent.closest('#neuroread-*')) {
+        if (parent && !this.isNeuroReadElement(parent)) {
           // Create highlight
           const span = document.createElement('span');
           span.className = 'neuroread-tts-highlight';
@@ -378,6 +378,15 @@ class TextToSpeech {
       // Fallback to main content
       this.speak(document.body.textContent.substring(0, 5000));
     }
+  }
+
+  isNeuroReadElement(element) {
+    if (!element) return false;
+    if (element.id && element.id.startsWith('neuroread-')) return true;
+    if (element.classList) {
+      return Array.from(element.classList).some(cls => cls.startsWith('neuroread-'));
+    }
+    return false;
   }
 }
 

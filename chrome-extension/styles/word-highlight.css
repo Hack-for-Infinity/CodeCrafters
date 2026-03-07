@@ -24,9 +24,10 @@
   bottom: 80px;
   right: 20px;
   display: flex;
+  align-items: center;
   gap: 8px;
   background: #1e293b;
-  padding: 8px;
+  padding: 8px 10px;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   pointer-events: auto;
@@ -55,12 +56,35 @@
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
 }
 
+.highlight-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255,255,255,0.15);
+  margin: 0 2px;
+}
+
+.highlight-rate {
+  color: #e2e8f0;
+  font-size: 13px;
+  padding: 0 4px;
+  min-width: 70px;
+  text-align: center;
+}
+
 /* Static word highlight for TTS */
 .neuroread-word-highlight-static {
   background: rgba(99, 102, 241, 0.3);
   border-radius: 3px;
   padding: 0 2px;
   animation: wordHighlightPulse 0.5s ease;
+}
+
+.neuroread-word-highlight-active {
+  background: rgba(34, 211, 238, 0.28);
+  color: inherit;
+  border-radius: 4px;
+  padding: 1px 2px;
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.18);
 }
 
 @keyframes wordHighlightPulse {

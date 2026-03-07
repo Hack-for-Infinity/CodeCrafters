@@ -8,6 +8,7 @@ class NeuroRead {
       focus: null,
       eye: null,
       scroll: null,
+      lineFocus: null,
       tts: null,
       highlight: null,
       dyslexia: null
@@ -17,11 +18,13 @@ class NeuroRead {
       focus: false,
       eye: false,
       scroll: false,
+      lineFocus: false,
       tts: false,
       highlight: false,
       dyslexia: false,
       theme: 'default'
     };
+    this.summaryOverlay = null;
     this.isInitialized = false;
     this.init();
   }
@@ -36,6 +39,7 @@ class NeuroRead {
     this.features.focus = new FocusMode();
     this.features.eye = new EyeTracker();
     this.features.scroll = new AutoScroll();
+    this.features.lineFocus = new LineFocus();
     this.features.tts = new TextToSpeech();
     this.features.highlight = new WordHighlight();
     this.features.dyslexia = new DyslexiaTheme();
@@ -150,6 +154,11 @@ class NeuroRead {
       if (e.altKey && e.key === 's') {
         e.preventDefault();
         this.toggleMode('scroll');
+      }
+      // Alt + L: Toggle Line Focus
+      if (e.altKey && e.key === 'l') {
+        e.preventDefault();
+        this.toggleMode('lineFocus');
       }
       // Alt + T: Toggle Text to Speech
       if (e.altKey && e.key === 't') {
@@ -283,6 +292,7 @@ class NeuroRead {
       focus: false,
       eye: false,
       scroll: false,
+      lineFocus: false,
       tts: false,
       highlight: false,
       dyslexia: false,
@@ -322,8 +332,106 @@ class NeuroRead {
   }
 
   async summarizePage() {
-    // This will be handled by the popup
-    chrome.runtime.sendMessage({ action: 'openSettings' });
+    const overlay = this.getSummaryOverlay();
+    const content = overlay.querySelector('.neuroread-summary-body');
+    const status = overlay.querySelector('.neuroread-summary-status');
+
+    overlay.style.display = 'block';
+    content.innerHTML = '';
+    status.textContent = 'Analyzing page...';
+
+    try {
+      const pageText = this.extractReadableText();
+      if (!pageText) throw new Error('No readable text detected');
+
+      const response = await fetch('http://localhost:3000/api/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: pageText, maxPoints: 6 })
+      });
+
+      const data = await response.json();
+      const summary = data?.summary;
+
+      if (summary) {
+        content.innerHTML = summary;
+        status.textContent = 'AI summary ready';
+      } else {
+        throw new Error('No summary returned');
+      }
+    } catch (error) {
+      console.error('Summarize error:', error);
+      status.textContent = 'Using quick fallback summary';
+      content.innerHTML = `
+        <ul>
+          <li><strong>Key Point 1:</strong> Highlights the main accessibility improvements on this page.</li>
+          <li><strong>Key Point 2:</strong> Focus mode and bionic reading can be toggled for distraction-free reading.</li>
+          <li><strong>Key Point 3:</strong> Eye tracking, auto-scroll, and TTS support hands-free reading.</li>
+          <li><strong>Key Point 4:</strong> Connect the backend (localhost:3000) for full AI summaries.</li>
+        </ul>
+      `;
+    }
+  }
+
+  getSummaryOverlay() {
+    if (this.summaryOverlay) return this.summaryOverlay;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'neuroread-summary-overlay';
+    overlay.innerHTML = `
+      <div class="neuroread-summary-card">
+        <div class="neuroread-summary-header">
+          <span>🤖 AI Summary</span>
+          <button class="neuroread-summary-close" aria-label="Close summary">✕</button>
+        </div>
+        <div class="neuroread-summary-status">Preparing...</div>
+        <div class="neuroread-summary-body"></div>
+      </div>
+    `;
+    overlay.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      max-width: 360px;
+      width: 92vw;
+      background: #0f172a;
+      color: #e2e8f0;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+      z-index: 999999;
+      padding: 14px;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: none;
+    `;
+
+    const card = overlay.querySelector('.neuroread-summary-card');
+    card.style.cssText = 'display: flex; flex-direction: column; gap: 10px;';
+
+    const header = overlay.querySelector('.neuroread-summary-header');
+    header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px;';
+
+    const body = overlay.querySelector('.neuroread-summary-body');
+    body.style.cssText = 'font-size: 13px; line-height: 1.6; max-height: 260px; overflow-y: auto;';
+
+    const status = overlay.querySelector('.neuroread-summary-status');
+    status.style.cssText = 'font-size: 12px; color: #94a3b8;';
+
+    const closeBtn = overlay.querySelector('.neuroread-summary-close');
+    closeBtn.style.cssText = 'background: none; border: none; color: inherit; cursor: pointer; font-size: 14px;';
+    closeBtn.addEventListener('click', () => {
+      overlay.style.display = 'none';
+    });
+
+    document.body.appendChild(overlay);
+    this.summaryOverlay = overlay;
+    return overlay;
+  }
+
+  extractReadableText() {
+    const root = document.querySelector('article') || document.querySelector('main') || document.body;
+    const text = root?.innerText || '';
+    return text.trim().substring(0, 5000);
   }
 }
 
