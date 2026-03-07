@@ -1,26 +1,90 @@
-// Icon generation instructions
-// Since we can't generate actual PNG files, here's how to create them:
+// Generate PNG icons using Canvas API in Node.js
+const { createCanvas } = require('canvas');
+const fs = require('fs');
+const path = require('path');
 
-/*
-To create the extension icons, you can:
+const sizes = [16, 48, 128];
 
-1. Use an online tool like:
-   - https://romannurik.github.io/IconKitchen/
-   - https://www.canva.com/
-   - https://www.figma.com/
+sizes.forEach(size => {
+   const canvas = createCanvas(size, size);
+   const ctx = canvas.getContext('2d');
 
-2. Or use ImageMagick:
-   convert -size 16x16 xc:'#6366f1' -pointsize 10 -fill white -gravity center -annotate +0+0 '🧠' icon16.png
-   convert -size 48x48 xc:'#6366f1' -pointsize 30 -fill white -gravity center -annotate +0+0 '🧠' icon48.png
-   convert -size 128x128 xc:'#6366f1' -pointsize 80 -fill white -gravity center -annotate +0+0 '🧠' icon128.png
+   // Gradient background
+   const gradient = ctx.createLinearGradient(0, 0, size, size);
+   gradient.addColorStop(0, '#6366f1');
+   gradient.addColorStop(1, '#8b5cf6');
 
-3. Or create a simple SVG and convert:
-   <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
-     <rect width="128" height="128" fill="#6366f1" rx="20"/>
-     <text x="64" y="90" font-size="80" text-anchor="middle" fill="white">🧠</text>
-   </svg>
+   // Rounded rect
+   const radius = size * 0.15;
+   ctx.beginPath();
+   ctx.moveTo(radius, 0);
+   ctx.lineTo(size - radius, 0);
+   ctx.quadraticCurveTo(size, 0, size, radius);
+   ctx.lineTo(size, size - radius);
+   ctx.quadraticCurveTo(size, size, size - radius, size);
+   ctx.lineTo(radius, size);
+   ctx.quadraticCurveTo(0, size, 0, size - radius);
+   ctx.lineTo(0, radius);
+   ctx.quadraticCurveTo(0, 0, radius, 0);
+   ctx.closePath();
+   ctx.fillStyle = gradient;
+   ctx.fill();
 
-For the hackathon, you can use placeholder icons or create simple ones quickly.
-*/
+   // Draw brain-like symbol
+   ctx.fillStyle = 'white';
+   const cx = size / 2;
+   const cy = size / 2;
+   const r = size * 0.3;
 
-console.log('Icon generation guide - see comments above');
+   // Left hemisphere
+   ctx.beginPath();
+   ctx.arc(cx - r * 0.15, cy, r, Math.PI * 0.5, Math.PI * 1.5);
+   ctx.fill();
+
+   // Right hemisphere
+   ctx.beginPath();
+   ctx.arc(cx + r * 0.15, cy, r, Math.PI * 1.5, Math.PI * 0.5);
+   ctx.fill();
+
+   // Dividing line
+   ctx.strokeStyle = gradient;
+   ctx.lineWidth = size * 0.04;
+   ctx.beginPath();
+   ctx.moveTo(cx, cy - r * 0.9);
+   ctx.lineTo(cx, cy + r * 0.9);
+   ctx.stroke();
+
+   // Brain folds (wavy lines)
+   ctx.strokeStyle = gradient;
+   ctx.lineWidth = size * 0.03;
+
+   // Left folds
+   ctx.beginPath();
+   ctx.moveTo(cx - r * 0.6, cy - r * 0.3);
+   ctx.quadraticCurveTo(cx - r * 0.3, cy - r * 0.5, cx - r * 0.1, cy - r * 0.2);
+   ctx.stroke();
+
+   ctx.beginPath();
+   ctx.moveTo(cx - r * 0.7, cy + r * 0.2);
+   ctx.quadraticCurveTo(cx - r * 0.4, cy, cx - r * 0.1, cy + r * 0.3);
+   ctx.stroke();
+
+   // Right folds  
+   ctx.beginPath();
+   ctx.moveTo(cx + r * 0.6, cy - r * 0.3);
+   ctx.quadraticCurveTo(cx + r * 0.3, cy - r * 0.5, cx + r * 0.1, cy - r * 0.2);
+   ctx.stroke();
+
+   ctx.beginPath();
+   ctx.moveTo(cx + r * 0.7, cy + r * 0.2);
+   ctx.quadraticCurveTo(cx + r * 0.4, cy, cx + r * 0.1, cy + r * 0.3);
+   ctx.stroke();
+
+   // Save
+   const outputPath = path.join(__dirname, `icon${size}.png`);
+   const buffer = canvas.toBuffer('image/png');
+   fs.writeFileSync(outputPath, buffer);
+   console.log(`Created ${outputPath}`);
+});
+
+console.log('All icons generated!');

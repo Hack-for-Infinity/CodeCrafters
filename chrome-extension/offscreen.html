@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NeuroRead Offscreen</title>
+</head>
+<body>
+  <!-- 
+    Offscreen document for NeuroRead Chrome Extension (Manifest V3).
+    Used for DOM parsing and accessibility analysis tasks
+    that require a DOM environment but not a visible page.
+  -->
+  <div id="parser-container"></div>
+  <script>
+    // Listen for messages from the service worker
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.action === 'parseHTML') {
+        const container = document.getElementById('parser-container');
+        container.innerHTML = request.html;
+        
+        // Extract readable content
+        const headings = Array.from(container.querySelectorAll('h1, h2, h3, h4, h5, h6'))
+          .map(h => ({ level: h.tagName, text: h.textContent.trim() }));
+        
+        const paragraphs = Array.from(container.querySelectorAll('p'))
+          .map(p => p.textContent.trim())
+          .filter(t => t.length > 20);
+        
+        const links = Array.from(container.querySelectorAll('a[href]'))
+          .map(a => ({ text: a.textContent.trim(), href: a.href }));
+        
+        sendResponse({
+          headings,
+          paragraphs,
+          links,
+          wordCount: container.textContent.split(/\s+/).length
+        });
+        
+        // Clean up
+        container.innerHTML = '';
+      }
+      return true;
+    });
+  </script>
+</body>
+</html>
